@@ -20,8 +20,6 @@ export default class User extends BaseModel {
     expiresIn: '1w',
   })
 
-  transformer = UserTransformer
-
   declare currentAccessToken: AccessToken
 
   // Columns ===========================
@@ -64,4 +62,10 @@ export default class User extends BaseModel {
 
   @manyToMany(() => Role, dbRef.membership.table.pivot())
   declare roles: ManyToMany<typeof Role>
+
+  // Extra =============================
+
+  get transformer() {
+    return new UserTransformer(this)
+  }
 }

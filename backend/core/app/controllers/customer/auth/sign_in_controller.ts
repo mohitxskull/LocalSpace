@@ -49,11 +49,7 @@ export default class Controller {
         })
       }
 
-      const credentialPassword = credential.password
-
-      if (!credentialPassword) {
-        throw new Error('Credential password is missing')
-      }
+      const credentialPassword = credential.getPasswordOrFail()
 
       if (!(await hash.verify(credentialPassword, payload.password))) {
         throw new BadRequestException('Invalid credentials', {

@@ -1,9 +1,8 @@
-// import CustomerProfile from '#models/customer_profile'
-import User from '#models/user'
-import { BaseTransformer } from '@localspace/node-lib/transformer'
+import type User from '#models/user'
+import { BaseTransformer } from '@localspace/node-lib'
 
 export class UserTransformer extends BaseTransformer<User> {
-  async default() {
+  async serialize() {
     return {
       id: this.resource.id,
       name: this.resource.name,
@@ -13,10 +12,11 @@ export class UserTransformer extends BaseTransformer<User> {
   }
 
   async customerProfile() {
-    await this.resource.load('customerProfile')
+    const [row] = await Promise.all([this.serialize(), this.resource.load('customerProfile')])
 
     return {
-      ...(await this.default()),
+      ...row,
+      customerProfile: await this.resource.customerProfile.transformer.serialize(),
     }
   }
 

@@ -1,11 +1,6 @@
 import { Logger } from '@adonisjs/core/logger'
 import { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import {
-  transform,
-  transformArray,
-  transformPage,
-} from '@localspace/node-lib/transformer'
 
 /**
  * The container bindings middleware binds classes to their request
@@ -19,19 +14,12 @@ export default class ContainerBindingsMiddleware {
     ctx.containerResolver.bindValue(HttpContext, ctx)
     ctx.containerResolver.bindValue(Logger, ctx.logger)
 
-    ctx.transform = transform
-    ctx.transformArray = transformArray
-    ctx.transformPage = transformPage
-
     return await next()
   }
 }
 
 declare module '@adonisjs/core/http' {
   export interface HttpContext {
-    transform: typeof transform
-    transformArray: typeof transformArray
-    transformPage: typeof transformPage
     deviceId: string
     isNewDevice: boolean
   }

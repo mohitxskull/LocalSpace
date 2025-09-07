@@ -62,7 +62,7 @@ export default class Controller {
 
       await trx.commit()
 
-      return { user: await ctx.transform(user) }
+      return { user: await user.transformer.serialize() }
     } catch (error) {
       await trx.rollback()
       throw error

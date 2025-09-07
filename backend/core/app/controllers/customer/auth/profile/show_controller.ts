@@ -5,7 +5,7 @@ export default class Controller {
     const user = ctx.auth.getUserOrFail()
 
     return {
-      user: await ctx.transform(user),
+      user: await user.transformer.serialize(),
     }
   }
 }

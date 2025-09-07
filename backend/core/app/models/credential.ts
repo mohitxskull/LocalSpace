@@ -51,4 +51,15 @@ export default class Credential extends BaseModel {
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
+
+  // Extra =============================
+
+  getPasswordOrFail() {
+    if (!this.password) {
+      throw new Error('Password not found', {
+        cause: this.toJSON(),
+      })
+    }
+    return this.password
+  }
 }

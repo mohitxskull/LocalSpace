@@ -1,5 +1,6 @@
 export { handler } from './src/handler.js'
 export { logDeep } from './src/log_deep.js'
-export { serializeAccessToken } from './src/serialize_access_token.js'
+export { serializeAccessToken, serializeDateTime } from './src/serialize.js'
 export { type PivotOptions, DBReference, type TableReference } from './src/db_reference.js'
 export { RIManager, type ResourceSchema, RIAuthorizationError } from './src/ri_manager.js'
+export { BaseTransformer } from './src/base_transformer.js'

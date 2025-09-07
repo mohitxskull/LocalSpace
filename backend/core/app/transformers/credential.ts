@@ -1,8 +1,8 @@
 import Credential from '#models/credential'
-import { BaseTransformer } from '@localspace/node-lib/transformer'
+import { BaseTransformer } from '@localspace/node-lib'
 
 export class CredentialTransformer extends BaseTransformer<Credential> {
-  async default() {
+  async serialize() {
     return {
       id: this.resource.id,
       method: this.resource.type,
