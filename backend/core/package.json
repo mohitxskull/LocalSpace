@@ -35,7 +35,8 @@
     "#database/*": "./database/*.js",
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#jobs/*": "./app/jobs/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -60,17 +61,22 @@
   "dependencies": {
     "@adonisjs/auth": "^9.4.0",
     "@adonisjs/bouncer": "^3.1.6",
+    "@adonisjs/cache": "^1.3.0",
     "@adonisjs/core": "^6.18.0",
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/drive": "^3.4.1",
     "@adonisjs/limiter": "^2.4.0",
     "@adonisjs/lucid": "^21.6.1",
+    "@adonisjs/mail": "^9.2.2",
     "@adonisjs/redis": "^9.2.0",
     "@folie/captcha": "^0.0.2",
+    "@julr/adonisjs-prometheus": "^1.2.0",
     "@localspace/lib": "workspace:*",
     "@localspace/node-lib": "workspace:*",
+    "@nemoventures/adonis-jobs": "^1.0.0",
     "@tuyau/core": "^0.4.2",
     "@vinejs/vine": "^3.0.1",
+    "bullmq": "^5.58.5",
     "luxon": "^3.7.1",
     "mysql2": "^3.14.3",
     "reflect-metadata": "^0.2.2",

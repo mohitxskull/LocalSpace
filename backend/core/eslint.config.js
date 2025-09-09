@@ -6,4 +6,7 @@ export default configApp({
       warnOnUnsupportedTypeScriptVersion: false,
     },
   },
+  linterOptions: {
+    reportUnusedDisableDirectives: 'off',
+  },
 })

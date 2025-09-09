@@ -69,6 +69,18 @@ const dbStructure = {
       updatedAt: 'updated_at',
     },
   },
+
+  document: {
+    name: 'documents',
+    columns: {
+      id: 'id',
+      userId: 'user_id',
+      title: 'title',
+      content: 'content',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  },
 } as const
 
 export const dbRef = DBReference.create(dbStructure)

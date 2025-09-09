@@ -5,6 +5,7 @@ const dbConfig = defineConfig({
   connection: 'mysql',
   connections: {
     mysql: {
+      debug: true,
       client: 'mysql2',
       connection: {
         host: env.get('DB_HOST'),

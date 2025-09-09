@@ -31,6 +31,9 @@ export default defineConfig({
     () => import('@tuyau/core/commands'),
     () => import('@adonisjs/bouncer/commands'),
     () => import('@localspace/node-lib/commands'),
+    () => import('@adonisjs/mail/commands'),
+    () => import('@nemoventures/adonis-jobs/commands'),
+    () => import('@adonisjs/cache/commands')
   ],
 
   /*
@@ -59,6 +62,10 @@ export default defineConfig({
     () => import('@adonisjs/drive/drive_provider'),
     () => import('@adonisjs/redis/redis_provider'),
     () => import('#providers/boot_provider'),
+    () => import('@adonisjs/mail/mail_provider'),
+    () => import('@nemoventures/adonis-jobs/queue_provider'),
+    () => import('@julr/adonisjs-prometheus/prometheus_provider'),
+    () => import('@adonisjs/cache/cache_provider')
   ],
 
   /*
@@ -69,7 +76,7 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [() => import('#start/routes'), () => import('#start/kernel')],
+  preloads: [() => import('#start/routes'), () => import('#start/kernel'), () => import('#start/mail')],
 
   /*
   |--------------------------------------------------------------------------
@@ -94,5 +101,9 @@ export default defineConfig({
       },
     ],
     forceExit: false,
+  },
+
+  directories: {
+    jobs: 'app/jobs',
   },
 })

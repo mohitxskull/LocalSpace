@@ -8,4 +8,8 @@ export const setting = {
       active: true,
     },
   },
+
+  document: {
+    max: 100,
+  },
 } as const
