@@ -9,6 +9,18 @@ export const setting = {
     },
   },
 
+  credential: {
+    email: {
+      verification: {
+        enabled: true,
+        required: true,
+        expiresIn: '15m',
+        purpose: 'credential-email-verification',
+        path: '/app/verify/email',
+      },
+    },
+  },
+
   document: {
     max: 100,
   },

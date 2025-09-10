@@ -4,6 +4,8 @@ import { defineConfig, transports } from '@adonisjs/mail'
 const mailConfig = defineConfig({
   default: 'resend',
 
+  from: 'onboarding@resend.dev',
+
   /**
    * The mailers object can be used to configure multiple mailers
    * each using a different transport or same transport with different

@@ -81,6 +81,19 @@ const dbStructure = {
       updatedAt: 'updated_at',
     },
   },
+
+  actionToken: {
+    name: 'action_tokens',
+    columns: {
+      id: 'id',
+      userId: 'user_id',
+      type: 'type',
+      hash: 'hash',
+      expiresAt: 'expires_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  },
 } as const
 
 export const dbRef = DBReference.create(dbStructure)

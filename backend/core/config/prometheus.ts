@@ -24,7 +24,7 @@ export default defineConfig({
    * metrics endpoint. If empty, then everyone
    * can access the endpoint
    */
-  ipsWhitelist: [],
+  ipsWhitelist: ['127.0.0.1'],
 
   /**
    * List of collectors that will be registered

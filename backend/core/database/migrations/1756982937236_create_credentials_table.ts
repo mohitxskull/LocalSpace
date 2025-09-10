@@ -22,6 +22,8 @@ export default class extends BaseSchema {
       t.timestamp(dbRef.credential.updatedAt).notNullable()
       t.timestamp(dbRef.credential.verifiedAt).nullable()
       t.timestamp(dbRef.credential.createdAt).notNullable()
+
+      t.unique([dbRef.credential.userId, dbRef.credential.type])
     })
   }
 

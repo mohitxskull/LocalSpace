@@ -16,3 +16,7 @@ export const HashS = () =>
 export const CredentialTypeS = () => vine.enum(['email'])
 
 export type CredentialTypeT = Infer<ReturnType<typeof CredentialTypeS>>
+
+export const ActionTokenTypeS = () => vine.enum(['email_verification', 'password_reset'])
+
+export type ActionTokenTypeT = Infer<ReturnType<typeof ActionTokenTypeS>>
