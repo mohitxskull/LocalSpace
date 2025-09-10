@@ -1,5 +1,5 @@
 import vine from '@vinejs/vine'
-import { Infer } from '@vinejs/vine/types'
+import { accessTokenTypeC, credentialTypeC } from '#types/literals'
 
 export const PageS = () => vine.number().min(1).max(100)
 
@@ -13,10 +13,6 @@ export const HashS = () =>
     .fixedLength(32)
     .regex(/^[a-z0-9]+$/)
 
-export const CredentialTypeS = () => vine.enum(['email'])
+export const CredentialTypeS = () => vine.enum(credentialTypeC)
 
-export type CredentialTypeT = Infer<ReturnType<typeof CredentialTypeS>>
-
-export const ActionTokenTypeS = () => vine.enum(['email_verification', 'password_reset'])
-
-export type ActionTokenTypeT = Infer<ReturnType<typeof ActionTokenTypeS>>
+export const AccessTokenTypeS = () => vine.enum(accessTokenTypeC)

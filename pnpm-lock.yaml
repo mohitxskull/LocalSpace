@@ -19,7 +19,7 @@ importers:
         version: 9.4.2(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@adonisjs/lucid@21.8.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(luxon@3.7.1)(mysql2@3.14.4))(@japa/api-client@3.1.0(@japa/assert@4.1.1(@japa/runner@4.4.0))(@japa/runner@4.4.0))(@japa/plugin-adonisjs@4.0.0(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@japa/api-client@3.1.0(@japa/assert@4.1.1(@japa/runner@4.4.0))(@japa/runner@4.4.0))(@japa/runner@4.4.0))
       '@adonisjs/bouncer':
         specifier: ^3.1.6
-        version: 3.1.6(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(edge.js@6.3.0)
+        version: 3.1.6(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@adonisjs/i18n@2.2.2(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(edge.js@6.3.0)
       '@adonisjs/cache':
         specifier: ^1.3.0
         version: 1.3.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@adonisjs/lucid@21.8.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(luxon@3.7.1)(mysql2@3.14.4))(@adonisjs/redis@9.2.0(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0)))(ioredis@5.7.0)(knex@3.1.0(mysql2@3.14.4))
@@ -32,6 +32,9 @@ importers:
       '@adonisjs/drive':
         specifier: ^3.4.1
         version: 3.4.1(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))
+      '@adonisjs/i18n':
+        specifier: ^2.2.2
+        version: 2.2.2(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(edge.js@6.3.0)
       '@adonisjs/limiter':
         specifier: ^2.4.0
         version: 2.4.0(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@adonisjs/lucid@21.8.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(luxon@3.7.1)(mysql2@3.14.4))(@adonisjs/redis@9.2.0(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0)))
@@ -562,6 +565,19 @@ packages:
       '@adonisjs/events': ^9.0.0
       '@adonisjs/fold': ^10.0.1
       '@adonisjs/logger': ^6.0.1
+
+  '@adonisjs/i18n@2.2.2':
+    resolution: {integrity: sha512-fE+IBoxW7btQXbkPoVOQR9FGhIROnMcCSD1dj0JiPqe1+fYDq0IouZaO8+5zhwZ8kHLiTv19U/NwLdc9hpaMiw==}
+    engines: {node: '>=18.16.0'}
+    peerDependencies:
+      '@adonisjs/core': ^6.6.0
+      '@vinejs/vine': ^2.0.0 || ^3.0.0
+      edge.js: ^6.0.2
+    peerDependenciesMeta:
+      '@vinejs/vine':
+        optional: true
+      edge.js:
+        optional: true
 
   '@adonisjs/limiter@2.4.0':
     resolution: {integrity: sha512-W3uhoQ9/dEDs6WQzyBhY0PFedwwkFQbVBaCjMffqJ4TJKsQqAUZdyKCwhvn6lEdqoSmlhTr/HOUh8M4+u7pJGQ==}
@@ -1386,6 +1402,9 @@ packages:
 
   '@poppinss/inspect@1.0.1':
     resolution: {integrity: sha512-kLeEaBSGhlleyYvKc7c9s3uE6xv7cwyulE0EgHf4jU/CL96h0yC4mkdw1wvC1l1PYYQozCGy46FwMBAAMOobCA==}
+
+  '@poppinss/intl-formatter@3.0.5':
+    resolution: {integrity: sha512-JnpQ64lAYl5Q8C3asUklDVponYJCQTjOAouzH/OaP2vvisykLUxVqL8Lo+9Vr+Hb9RPPfZ/cwANEvHTL1rcEiw==}
 
   '@poppinss/macroable@1.0.5':
     resolution: {integrity: sha512-6u61y1HHd090MEk1Av0/1btDmm2Hh/+XoJj+HgFYRh9koUPI822ybJbwLHuqjLNCiY+o1gRykg2igEqOf/VBZw==}
@@ -3667,6 +3686,9 @@ packages:
   fast-diff@1.3.0:
     resolution: {integrity: sha512-VxPP4NqbUjj6MaAOafWeUn2cXWLcCtljklUtZf0Ind4XQ+QPtmA0b18zZy0jIQx+ExRVCR/ZQpBmik5lXshNsw==}
 
+  fast-equals@3.0.3:
+    resolution: {integrity: sha512-NCe8qxnZFARSHGztGMZOO/PC1qa5MIFB5Hp66WdzbCRAz8U8US3bx1UTgLS49efBQPcUtO9gf5oVEY8o7y/7Kg==}
+
   fast-glob@3.3.1:
     resolution: {integrity: sha512-kNFPyjhh5cKjrUltxs+wFx+ZkbRaxxmZ+X0ZU31SOsxCEtP9VPgtq2teZw1DebupL5GmDaNQ6yKMMVcM41iqDg==}
     engines: {node: '>=8.6.0'}
@@ -4453,6 +4475,9 @@ packages:
     resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}
     engines: {node: '>= 0.6'}
 
+  micro-memoize@4.1.3:
+    resolution: {integrity: sha512-DzRMi8smUZXT7rCGikRwldEh6eO6qzKiPPopcr1+2EY3AYKpy5fu159PKWwIS9A6IWnrvPKDMcuFtyrroZa8Bw==}
+
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
@@ -4517,6 +4542,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  moize@6.1.6:
+    resolution: {integrity: sha512-vSKdIUO61iCmTqhdoIDrqyrtp87nWZUmBPniNjO0fX49wEYmyDO4lvlnFXiGcaH1JLE/s/9HbiK4LSHsbiUY6Q==}
+
   monaco-editor@0.52.2:
     resolution: {integrity: sha512-GEQWEZmfkOGLdd3XK8ryrfWz3AIP8YymVXiPHEdewrUq7mh0qrKrfHLNCXcbB6sTnMLnOZ3ztSiKcciFUkIJwQ==}
 
@@ -4560,6 +4588,10 @@ packages:
 
   negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
+    engines: {node: '>= 0.6'}
+
+  negotiator@1.0.0:
+    resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
 
   nested-error-stacks@2.1.1:
@@ -5828,6 +5860,11 @@ packages:
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
+  yaml@2.8.1:
+    resolution: {integrity: sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yargs-parser@20.2.9:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
     engines: {node: '>=10'}
@@ -5946,11 +5983,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@adonisjs/bouncer@3.1.6(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(edge.js@6.3.0)':
+  '@adonisjs/bouncer@3.1.6(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@adonisjs/i18n@2.2.2(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(edge.js@6.3.0)':
     dependencies:
       '@poppinss/utils': 6.10.1
     optionalDependencies:
       '@adonisjs/core': 6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0)
+      '@adonisjs/i18n': 2.2.2(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(edge.js@6.3.0)
       edge.js: 6.3.0
 
   '@adonisjs/cache@1.3.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@adonisjs/lucid@21.8.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(luxon@3.7.1)(mysql2@3.14.4))(@adonisjs/redis@9.2.0(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0)))(ioredis@5.7.0)(knex@3.1.0(mysql2@3.14.4))':
@@ -6103,6 +6141,19 @@ snapshots:
       type-is: 2.0.1
       vary: 1.1.2
       youch: 3.3.4
+
+  '@adonisjs/i18n@2.2.2(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(edge.js@6.3.0)':
+    dependencies:
+      '@adonisjs/core': 6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0)
+      '@poppinss/intl-formatter': 3.0.5
+      '@poppinss/utils': 6.10.1
+      intl-messageformat: 10.7.16
+      luxon: 3.7.1
+      negotiator: 1.0.0
+      yaml: 2.8.1
+    optionalDependencies:
+      '@vinejs/vine': 3.0.1
+      edge.js: 6.3.0
 
   '@adonisjs/limiter@2.4.0(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@adonisjs/lucid@21.8.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0))(@vinejs/vine@3.0.1)(luxon@3.7.1)(mysql2@3.14.4))(@adonisjs/redis@9.2.0(@adonisjs/core@6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0)))':
     dependencies:
@@ -7175,6 +7226,10 @@ snapshots:
   '@poppinss/hooks@7.2.6': {}
 
   '@poppinss/inspect@1.0.1': {}
+
+  '@poppinss/intl-formatter@3.0.5':
+    dependencies:
+      moize: 6.1.6
 
   '@poppinss/macroable@1.0.5': {}
 
@@ -10140,6 +10195,8 @@ snapshots:
 
   fast-diff@1.3.0: {}
 
+  fast-equals@3.0.3: {}
+
   fast-glob@3.3.1:
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -10867,6 +10924,8 @@ snapshots:
 
   methods@1.1.2: {}
 
+  micro-memoize@4.1.3: {}
+
   micromatch@4.0.8:
     dependencies:
       braces: 3.0.3
@@ -10916,6 +10975,11 @@ snapshots:
 
   mkdirp@3.0.1: {}
 
+  moize@6.1.6:
+    dependencies:
+      fast-equals: 3.0.3
+      micro-memoize: 4.1.3
+
   monaco-editor@0.52.2: {}
 
   ms@2.1.2: {}
@@ -10963,6 +11027,8 @@ snapshots:
   natural-compare@1.4.0: {}
 
   negotiator@0.6.3: {}
+
+  negotiator@1.0.0: {}
 
   nested-error-stacks@2.1.1: {}
 
@@ -12386,6 +12452,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   yallist@4.0.0: {}
+
+  yaml@2.8.1: {}
 
   yargs-parser@20.2.9: {}
 

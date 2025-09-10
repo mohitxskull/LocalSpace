@@ -2,9 +2,9 @@ import { BaseModel, beforeSave, belongsTo, column } from '@adonisjs/lucid/orm'
 import { dbRef } from '#database/reference'
 import User from './user.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { type CredentialTypeT } from '#validators/index'
 import hash from '@adonisjs/core/services/hash'
 import { DateTime } from 'luxon'
+import { type CredentialTypeT } from '#types/literals'
 
 export default class Credential extends BaseModel {
   static table = dbRef.credential.table.name

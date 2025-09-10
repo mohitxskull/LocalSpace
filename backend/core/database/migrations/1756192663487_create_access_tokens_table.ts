@@ -3,24 +3,24 @@ import { dbRef } from '#database/reference'
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'auth_access_tokens'
+  protected tableName = dbRef.accessToken.table.name
 
   async up() {
     this.schema.createTable(this.tableName, (t) => {
-      t.increments('id')
-      t.string('tokenable_id', ULID_LENGTH)
+      t.increments(dbRef.accessToken.id)
+      t.string(dbRef.accessToken.tokenableId, ULID_LENGTH)
         .notNullable()
         .references(dbRef.user.table.columns('id'))
         .onDelete('CASCADE')
 
-      t.string('type').notNullable()
-      t.string('name').nullable()
-      t.string('hash').notNullable()
-      t.text('abilities').notNullable()
-      t.timestamp('created_at')
-      t.timestamp('updated_at')
-      t.timestamp('last_used_at').nullable()
-      t.timestamp('expires_at').nullable()
+      t.string(dbRef.accessToken.type).notNullable()
+      t.string(dbRef.accessToken.name).nullable()
+      t.string(dbRef.accessToken.hash).notNullable()
+      t.text(dbRef.accessToken.abilities).notNullable()
+      t.timestamp(dbRef.accessToken.createdAt)
+      t.timestamp(dbRef.accessToken.updatedAt)
+      t.timestamp(dbRef.accessToken.lastUsedAt).nullable()
+      t.timestamp(dbRef.accessToken.expiresAt).nullable()
     })
   }
 

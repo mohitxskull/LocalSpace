@@ -1,0 +1,11 @@
+{
+  "shared": {
+    "fields": {
+      "first_name": "first name"
+    },
+    "messages": {
+      "required": "Enter {field}",
+      "email": "The email must be valid"
+    }
+  }
+}

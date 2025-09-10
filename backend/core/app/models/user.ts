@@ -1,6 +1,9 @@
 import { DateTime } from 'luxon'
 import { BaseModel, beforeCreate, column, hasMany, hasOne, manyToMany } from '@adonisjs/lucid/orm'
-import { AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
+import {
+  AccessToken as AccessTokenHolderOriginal,
+  DbAccessTokensProvider,
+} from '@adonisjs/auth/access_tokens'
 import { dbRef } from '#database/reference'
 import { ulid } from '#config/ulid'
 import Membership from './membership.js'
@@ -11,16 +14,23 @@ import Permission from './permission.js'
 import CustomerProfile from './customer_profile.js'
 import AdminProfile from './admin_profile.js'
 import { UserTransformer } from '#transformers/user'
+import { setting } from '#config/setting'
+import { AccessTokenManager } from '#miscellaneous/access_token_manager'
+import AccessToken from './access_token.js'
+import { accessTokenTypeE } from '#types/literals'
 
 export default class User extends BaseModel {
   static selfAssignPrimaryKey = true
   static table = dbRef.user.table.name
 
-  static accessTokens = DbAccessTokensProvider.forModel(User, {
-    expiresIn: '1w',
+  static authAccessTokens = DbAccessTokensProvider.forModel(User, {
+    expiresIn: setting.session.expiresIn,
+    type: accessTokenTypeE('auth'),
+    table: dbRef.accessToken.table.name,
+    prefix: AccessTokenManager.prefix,
   })
 
-  declare currentAccessToken: AccessToken
+  declare currentAccessToken: AccessTokenHolderOriginal
 
   // Columns ===========================
 
@@ -59,6 +69,9 @@ export default class User extends BaseModel {
 
   @hasMany(() => Membership)
   declare memberships: HasMany<typeof Membership>
+
+  @hasMany(() => AccessToken)
+  declare accessTokens: HasMany<typeof AccessToken>
 
   @manyToMany(() => Role, dbRef.membership.table.pivot())
   declare roles: ManyToMany<typeof Role>

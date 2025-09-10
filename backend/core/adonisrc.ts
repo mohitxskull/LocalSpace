@@ -33,7 +33,7 @@ export default defineConfig({
     () => import('@localspace/node-lib/commands'),
     () => import('@adonisjs/mail/commands'),
     () => import('@nemoventures/adonis-jobs/commands'),
-    () => import('@adonisjs/cache/commands')
+    () => import('@adonisjs/cache/commands'),
   ],
 
   /*
@@ -65,7 +65,8 @@ export default defineConfig({
     () => import('@adonisjs/mail/mail_provider'),
     () => import('@nemoventures/adonis-jobs/queue_provider'),
     () => import('@julr/adonisjs-prometheus/prometheus_provider'),
-    () => import('@adonisjs/cache/cache_provider')
+    () => import('@adonisjs/cache/cache_provider'),
+    () => import('@adonisjs/i18n/i18n_provider'),
   ],
 
   /*
@@ -76,7 +77,11 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [() => import('#start/routes'), () => import('#start/kernel'), () => import('#start/mail')],
+  preloads: [
+    () => import('#start/routes'),
+    () => import('#start/kernel'),
+    () => import('#start/mail'),
+  ],
 
   /*
   |--------------------------------------------------------------------------
@@ -106,4 +111,10 @@ export default defineConfig({
   directories: {
     jobs: 'app/jobs',
   },
+  metaFiles: [
+    {
+      pattern: 'resources/lang/**/*.{json,yaml,yml}',
+      reloadServer: false,
+    },
+  ],
 })

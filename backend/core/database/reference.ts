@@ -81,17 +81,27 @@ const dbStructure = {
       updatedAt: 'updated_at',
     },
   },
-
-  actionToken: {
-    name: 'action_tokens',
+  accessToken: {
+    name: 'access_tokens',
     columns: {
       id: 'id',
-      userId: 'user_id',
+      tokenableId: 'tokenable_id',
       type: 'type',
+      name: 'name',
       hash: 'hash',
-      expiresAt: 'expires_at',
+      abilities: 'abilities',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
+      lastUsedAt: 'last_used_at',
+      expiresAt: 'expires_at',
+    },
+  },
+  rateLimit: {
+    name: 'rate_limits',
+    columns: {
+      key: 'key',
+      points: 'points',
+      expire: 'expire',
     },
   },
 } as const

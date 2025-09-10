@@ -1,7 +1,7 @@
 import { dbRef } from '#database/reference'
 import Credential from '#models/credential'
+import { credentialTypeE } from '#types/literals'
 import { CustomerPasswordS } from '#validators/customer'
-import { CredentialTypeT } from '#validators/index'
 import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
 import { BadRequestException } from '@localspace/node-lib/exception'
@@ -21,7 +21,7 @@ export default class Controller {
 
     const credential = await Credential.findByOrFail({
       [dbRef.credential.userIdC]: user.id,
-      [dbRef.credential.typeC]: 'email' as CredentialTypeT,
+      [dbRef.credential.typeC]: credentialTypeE('email'),
     })
 
     const payload = await ctx.request.validateUsing(input)
@@ -29,7 +29,7 @@ export default class Controller {
     const credentialPassword = credential.getPasswordOrFail()
 
     if (!(await hash.verify(credentialPassword, payload.oldPassword))) {
-      throw new BadRequestException('Invalid password', {
+      throw new BadRequestException(ctx.i18n.t('customer.auth.password.update.invalid_password'), {
         source: 'oldPassword',
       })
     }
@@ -40,6 +40,7 @@ export default class Controller {
 
     return {
       user: await user.transformer.serialize(),
+      message: ctx.i18n.t('customer.auth.password.update.success'),
     }
   }
 }

@@ -9,6 +9,11 @@ export const setting = {
     },
   },
 
+  session: {
+    max: 2,
+    expiresIn: '1w',
+  },
+
   credential: {
     email: {
       verification: {

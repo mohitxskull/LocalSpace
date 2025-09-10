@@ -1,7 +1,10 @@
-import ActionToken from '#models/action_token'
+import { setting } from '#config/setting'
 import Credential from '#models/credential'
 import User from '#models/user'
+import env from '#start/env'
+import router from '@adonisjs/core/services/router'
 import { BaseMail } from '@adonisjs/mail'
+import { AccessTokenHolder } from '#miscellaneous/access_token_manager'
 
 export default class VerifyEmailNotification extends BaseMail {
   subject = 'Verify your email'
@@ -10,7 +13,7 @@ export default class VerifyEmailNotification extends BaseMail {
     private params: {
       user: User
       credential: Credential
-      actionToken: ActionToken
+      accessTokenHolder: AccessTokenHolder
     }
   ) {
     super()
@@ -30,6 +33,17 @@ export default class VerifyEmailNotification extends BaseMail {
     const userName = this.params.user.name
     const email = this.params.credential.identifier
 
-    this.message.to('user@example.com')
+    const url = router
+      .builder()
+      .disableRouteLookup()
+      .prefixUrl(new URL(env.get('APP_CLIENT_URL')).origin)
+      .qs({ token: this.params.accessTokenHolder.getValueOrFail().release() })
+      .make(setting.credential.email.verification.path)
+
+    this.message.to(email)
+    this.message.htmlView('emails/email_verification', {
+      url,
+      user: { name: userName },
+    })
   }
 }

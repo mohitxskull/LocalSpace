@@ -1,0 +1,24 @@
+{
+  "customer": {
+    "auth": {
+      "sign_up": {
+        "email_exists": "Email already exists.",
+        "disabled": "Sign up is currently disabled.",
+        "success": "You have successfully signed up!",
+        "email_verification_required": "A confirmation link has been sent to your email. Please check your inbox to complete your registration."
+      },
+      "sign_in": {
+        "invalid_credentials": "Invalid credentials",
+        "disabled": "Sign in is currently disabled.",
+        "success": "You have successfully signed in!",
+        "email_verification_required": "A confirmation link has been sent to your email. Please check your inbox to complete your registration."
+      },
+      "password": {
+        "update": {
+          "invalid_password": "Invalid password",
+          "success": "Password updated successfully"
+        }
+      }
+    }
+  }
+}
