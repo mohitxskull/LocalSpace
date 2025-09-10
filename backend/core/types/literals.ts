@@ -16,3 +16,11 @@ export const credentialTypeC = ['email'] as const
 export type CredentialTypeT = (typeof credentialTypeC)[number]
 
 export const credentialTypeE = identityOf<CredentialTypeT>()
+
+// ===================================
+
+export const roleC = ['admin', 'customer'] as const
+
+export type RoleT = (typeof roleC)[number]
+
+export const roleE = identityOf<RoleT>()

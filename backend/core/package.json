@@ -39,7 +39,8 @@
     "#config/*": "./config/*.js",
     "#jobs/*": "./app/jobs/*.js",
     "#miscellaneous/*": "./app/miscellaneous/*.js",
-    "#types/*": "./types/*.js"
+    "#types/*": "./types/*.js",
+    "#cacher/*": "./app/cacher/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",

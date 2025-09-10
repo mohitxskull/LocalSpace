@@ -9,7 +9,7 @@ import { DateTime } from 'luxon'
 export class AccessTokenHolder extends AccessTokenHolderOriginal {
   declare type: AccessTokenTypeT
 
-  constructor(attributes: {
+  constructor(params: {
     id: number
     userId: string
     type: string
@@ -23,17 +23,17 @@ export class AccessTokenHolder extends AccessTokenHolderOriginal {
     secret?: Secret<string>
   }) {
     super({
-      identifier: attributes.id,
-      tokenableId: attributes.userId,
-      type: attributes.type,
-      hash: attributes.hash,
-      createdAt: attributes.createdAt.toJSDate(),
-      updatedAt: attributes.updatedAt.toJSDate(),
-      lastUsedAt: attributes.lastUsedAt?.toJSDate() || null,
-      expiresAt: attributes.expiresAt?.toJSDate() || null,
-      name: attributes.name || null,
-      prefix: attributes.prefix,
-      secret: attributes.secret,
+      identifier: params.id,
+      tokenableId: params.userId,
+      type: params.type,
+      hash: params.hash,
+      createdAt: params.createdAt.toJSDate(),
+      updatedAt: params.updatedAt.toJSDate(),
+      lastUsedAt: params.lastUsedAt?.toJSDate() || null,
+      expiresAt: params.expiresAt?.toJSDate() || null,
+      name: params.name || null,
+      prefix: params.prefix,
+      secret: params.secret,
     })
   }
 
@@ -56,16 +56,16 @@ export class AccessTokenHolder extends AccessTokenHolderOriginal {
 export class AccessTokenManager {
   static prefix = 'at_'
 
-  static async create(attributes: {
+  static async create(params: {
     name?: string
     user: User
     type: AccessTokenTypeT
     expiresIn?: string
   }) {
     const transientToken = AccessTokenHolderOriginal.createTransientToken(
-      attributes.user.id,
+      params.user.id,
       32,
-      attributes.expiresIn
+      params.expiresIn
     )
 
     const dateTimeExpiresAt = transientToken.expiresAt
@@ -77,9 +77,9 @@ export class AccessTokenManager {
     }
 
     const actionToken = await AccessToken.create({
-      tokenableId: attributes.user.id,
-      type: attributes.type,
-      name: attributes.name,
+      tokenableId: params.user.id,
+      type: params.type,
+      name: params.name,
       hash: transientToken.hash,
       abilities: '',
       expiresAt: dateTimeExpiresAt,
@@ -87,7 +87,7 @@ export class AccessTokenManager {
 
     return new AccessTokenHolder({
       id: actionToken.id,
-      userId: attributes.user.id,
+      userId: params.user.id,
       type: actionToken.type,
       prefix: this.prefix,
       secret: transientToken.secret,
@@ -98,8 +98,8 @@ export class AccessTokenManager {
     })
   }
 
-  static async verify(attributes: { token: string; type: AccessTokenTypeT }) {
-    const decodedToken = AccessTokenHolder.decode(this.prefix, attributes.token)
+  static async verify(params: { token: string; type: AccessTokenTypeT }) {
+    const decodedToken = AccessTokenHolder.decode(this.prefix, params.token)
 
     if (!decodedToken) {
       return null
@@ -107,7 +107,7 @@ export class AccessTokenManager {
 
     const accessToken = await AccessToken.findBy({
       [dbRef.accessToken.id]: decodedToken.identifier,
-      [dbRef.accessToken.type]: attributes.type,
+      [dbRef.accessToken.type]: params.type,
     })
 
     if (!accessToken) {

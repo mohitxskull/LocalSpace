@@ -17,7 +17,11 @@ export const customerAuthRoutes = () => {
           router.get('', [() => import('#controllers/customer/auth/profile/show_controller')])
         })
         .prefix('profile')
-        .use([middleware.auth()])
+        .use([
+          middleware.auth({
+            roles: ['customer'],
+          }),
+        ])
     })
     .prefix('auth')
 }

@@ -14,6 +14,12 @@ const cacheConfig = defineConfig({
         })
       ),
   },
+
+  onFactoryError: (e) => {
+    if (e.cause && e.cause instanceof Error) {
+      throw e.cause
+    }
+  },
 })
 
 export default cacheConfig

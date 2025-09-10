@@ -18,19 +18,12 @@ import { setting } from '#config/setting'
 import { AccessTokenManager } from '#miscellaneous/access_token_manager'
 import AccessToken from './access_token.js'
 import { accessTokenTypeE } from '#types/literals'
+import cache from '@adonisjs/cache/services/main'
+import { UserCacher } from '../cacher/user.js'
 
 export default class User extends BaseModel {
   static selfAssignPrimaryKey = true
   static table = dbRef.user.table.name
-
-  static authAccessTokens = DbAccessTokensProvider.forModel(User, {
-    expiresIn: setting.session.expiresIn,
-    type: accessTokenTypeE('auth'),
-    table: dbRef.accessToken.table.name,
-    prefix: AccessTokenManager.prefix,
-  })
-
-  declare currentAccessToken: AccessTokenHolderOriginal
 
   // Columns ===========================
 
@@ -78,7 +71,20 @@ export default class User extends BaseModel {
 
   // Extra =============================
 
+  static authAccessTokens = DbAccessTokensProvider.forModel(User, {
+    expiresIn: setting.session.expiresIn,
+    type: accessTokenTypeE('auth'),
+    table: dbRef.accessToken.table.name,
+    prefix: AccessTokenManager.prefix,
+  })
+
+  declare currentAccessToken: AccessTokenHolderOriginal
+
   get transformer() {
     return new UserTransformer(this)
+  }
+
+  static get cacher() {
+    return new UserCacher(User, cache.namespace(this.table))
   }
 }

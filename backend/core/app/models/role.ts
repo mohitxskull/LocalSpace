@@ -3,6 +3,7 @@ import { dbRef } from '#database/reference'
 import Membership from './membership.js'
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
+import { type RoleT } from '#types/literals'
 
 export default class Role extends BaseModel {
   static table = dbRef.role.table.name
@@ -13,7 +14,7 @@ export default class Role extends BaseModel {
   declare id: string
 
   @column()
-  declare name: string
+  declare name: RoleT
 
   // Relations =========================
 
