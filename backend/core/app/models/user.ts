@@ -6,20 +6,19 @@ import {
 } from '@adonisjs/auth/access_tokens'
 import { dbRef } from '#database/reference'
 import { ulid } from '#config/ulid'
-import Membership from './membership.js'
 import type { HasMany, HasOne, ManyToMany } from '@adonisjs/lucid/types/relations'
-import Role from './role.js'
 import Credential from './credential.js'
 import Permission from './permission.js'
 import CustomerProfile from './customer_profile.js'
 import AdminProfile from './admin_profile.js'
 import { UserTransformer } from '#transformers/user'
 import { setting } from '#config/setting'
-import { AccessTokenManager } from '#miscellaneous/access_token_manager'
 import AccessToken from './access_token.js'
-import { accessTokenTypeE } from '#types/literals'
+import { accessTokenTypeE, type RoleT } from '#types/literals'
 import cache from '@adonisjs/cache/services/main'
 import { UserCacher } from '../cacher/user.js'
+import Workspace from './workspace.js'
+import WorkspaceMember from './workspace_member.js'
 
 export default class User extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -32,6 +31,9 @@ export default class User extends BaseModel {
 
   @column()
   declare name: string | null
+
+  @column()
+  declare role: RoleT
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime<true>
@@ -60,14 +62,14 @@ export default class User extends BaseModel {
   @hasOne(() => AdminProfile)
   declare adminProfile: HasOne<typeof AdminProfile>
 
-  @hasMany(() => Membership)
-  declare memberships: HasMany<typeof Membership>
-
   @hasMany(() => AccessToken)
   declare accessTokens: HasMany<typeof AccessToken>
 
-  @manyToMany(() => Role, dbRef.membership.table.pivot())
-  declare roles: ManyToMany<typeof Role>
+  @manyToMany(() => Workspace, dbRef.workspaceMember.table.pivot())
+  declare workspaces: ManyToMany<typeof Workspace>
+
+  @hasMany(() => WorkspaceMember)
+  declare workspaceMember: HasMany<typeof WorkspaceMember>
 
   // Extra =============================
 
@@ -75,7 +77,7 @@ export default class User extends BaseModel {
     expiresIn: setting.session.expiresIn,
     type: accessTokenTypeE('auth'),
     table: dbRef.accessToken.table.name,
-    prefix: AccessTokenManager.prefix,
+    tokenSecretLength: 42,
   })
 
   declare currentAccessToken: AccessTokenHolderOriginal

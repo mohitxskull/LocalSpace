@@ -21,7 +21,11 @@ export const setting = {
         required: true,
         expiresIn: '15m',
         purpose: 'credential-email-verification',
-        path: '/app/verify/email',
+        path: '/verify/email',
+      },
+      passwordReset: {
+        expiresIn: '15m',
+        path: '/reset-password',
       },
     },
   },

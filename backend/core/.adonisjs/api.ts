@@ -8,63 +8,77 @@ import type { MakeTuyauRequest, MakeTuyauResponse } from '@tuyau/utils/types'
 import type { InferInput } from '@vinejs/vine/types'
 
 type ApiV1CustomerAuthSigninPost = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/sign_in_controller.ts')['input']>>
-  response: MakeTuyauResponse<import('../app/controllers/customer/auth/sign_in_controller.ts').default['handle'], true>
+  request: MakeTuyauRequest<
+    InferInput<(typeof import('../app/controllers/customer/auth/sign_in_controller.ts'))['input']>
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/auth/sign_in_controller.ts').default['handle'],
+    true
+  >
 }
 type ApiV1CustomerAuthSignupPost = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/sign_up_controller.ts')['input']>>
-  response: MakeTuyauResponse<import('../app/controllers/customer/auth/sign_up_controller.ts').default['handle'], true>
+  request: MakeTuyauRequest<
+    InferInput<(typeof import('../app/controllers/customer/auth/sign_up_controller.ts'))['input']>
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/auth/sign_up_controller.ts').default['handle'],
+    true
+  >
 }
 type ApiV1CustomerAuthProfileGetHead = {
   request: unknown
-  response: MakeTuyauResponse<import('../app/controllers/customer/auth/profile/show_controller.ts').default['handle'], false>
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/auth/profile/show_controller.ts').default['handle'],
+    false
+  >
 }
 type ApiV1PingGetHead = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/ping_controller.ts')['input']>>
-  response: MakeTuyauResponse<import('../app/controllers/ping_controller.ts').default['handle'], true>
+  request: MakeTuyauRequest<
+    InferInput<(typeof import('../app/controllers/ping_controller.ts'))['input']>
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/ping_controller.ts').default['handle'],
+    true
+  >
 }
 export interface ApiDefinition {
-  'api': {
-    'v1': {
-      'customer': {
-        'auth': {
+  api: {
+    v1: {
+      customer: {
+        auth: {
           'sign-in': {
-            '$url': {
-            };
-            '$post': ApiV1CustomerAuthSigninPost;
-          };
+            $url: {}
+            $post: ApiV1CustomerAuthSigninPost
+          }
           'sign-up': {
-            '$url': {
-            };
-            '$post': ApiV1CustomerAuthSignupPost;
-          };
+            $url: {}
+            $post: ApiV1CustomerAuthSignupPost
+          }
           'profile': {
-            '$url': {
-            };
-            '$get': ApiV1CustomerAuthProfileGetHead;
-            '$head': ApiV1CustomerAuthProfileGetHead;
-          };
-        };
-      };
-      'ping': {
-        '$url': {
-        };
-        '$get': ApiV1PingGetHead;
-        '$head': ApiV1PingGetHead;
-      };
-    };
-  };
+            $url: {}
+            $get: ApiV1CustomerAuthProfileGetHead
+            $head: ApiV1CustomerAuthProfileGetHead
+          }
+        }
+      }
+      ping: {
+        $url: {}
+        $get: ApiV1PingGetHead
+        $head: ApiV1PingGetHead
+      }
+    }
+  }
 }
 const routes = [
   {
     params: [],
     name: 'prometheus.metrics',
     path: '/metrics',
-    method: ["GET","HEAD"],
+    method: ['GET', 'HEAD'],
     types: {} as unknown,
   },
-] as const;
+] as const
 export const api = {
   routes,
-  definition: {} as ApiDefinition
+  definition: {} as ApiDefinition,
 }

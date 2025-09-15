@@ -6,12 +6,11 @@ import { setting } from '#config/setting'
 import Credential from '#models/credential'
 import { dbRef } from '#database/reference'
 import hash from '@adonisjs/core/services/hash'
-import { serializeAccessToken } from '@localspace/node-lib'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
-import { AccessTokenManager } from '#miscellaneous/access_token_manager'
 import AccessToken from '#models/access_token'
 import { accessTokenTypeE, credentialTypeE } from '#types/literals'
+import limiter from '@adonisjs/limiter/services/main'
 
 export const input = vine.compile(
   vine.object({
@@ -27,6 +26,13 @@ export default class Controller {
     }
 
     const payload = await ctx.request.validateUsing(input)
+
+    const signInLimiter = limiter.use({
+      requests: 5,
+      duration: '1 day',
+    })
+
+    await signInLimiter.consume(`customer_sign_in_${ctx.request.ip()}_${payload.email}`)
 
     const trx = await db.transaction()
 
@@ -59,20 +65,62 @@ export default class Controller {
         })
       }
 
-      credential.usedAt = DateTime.now()
-
-      await Promise.all([credential.save(), credential.load('user')])
+      await credential.load('user')
 
       const user = credential.user
 
-      const existingAuthAccessTokens = await AccessToken.query().where({
+      if (credential.status === 'bounced' || credential.status === 'complained') {
+        const emailUpdateToken = await accessTokenService.create(
+          {
+            type: accessTokenTypeE('email_update'),
+            user: credential.user,
+            expiresIn: '15m',
+          },
+          {
+            deleteIfExists: true,
+            client: trx,
+          }
+        )
+        throw new ForbiddenException(ctx.i18n.t('customer.auth.sign_in.email_status_invalid'), {
+          code: 'EMAIL_STATUS_INVALID',
+          metadata: {
+            emailUpdateToken: emailUpdateToken.getValueOrFail().release(),
+          },
+        })
+      }
+
+      const emailVerificationRequired = setting.credential.email.verification.enabled
+
+      if (emailVerificationRequired && !credential.verifiedAt) {
+        throw new BadRequestException(
+          ctx.i18n.t('customer.auth.sign_in.email_verification_required'),
+          {
+            code: 'EMAIL_NOT_VERIFIED',
+            source: 'email',
+            reason: 'Email verification is required',
+          }
+        )
+      }
+
+      credential.usedAt = DateTime.now()
+
+      await credential.save()
+
+      const existingAuthAccessTokens = await AccessToken.query({ client: trx }).where({
         [dbRef.accessToken.tokenableId]: user.id,
         [dbRef.accessToken.type]: accessTokenTypeE('auth'),
       })
 
-      if (existingAuthAccessTokens.length > setting.session.max) {
-        const tokensToDelete = existingAuthAccessTokens.slice(setting.session.max)
-        await AccessToken.query()
+      const maxTokensAfterNewOne = setting.session.max
+      const currentTokenCount = existingAuthAccessTokens.length
+      const tokensToDeleteCount = Math.max(0, currentTokenCount - maxTokensAfterNewOne + 1)
+
+      if (tokensToDeleteCount > 0) {
+        const tokensToDelete = existingAuthAccessTokens
+          .sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis())
+          .slice(0, tokensToDeleteCount)
+
+        await AccessToken.query({ client: trx })
           .whereIn(
             dbRef.accessToken.id,
             tokensToDelete.map((token) => token.id)
@@ -80,14 +128,21 @@ export default class Controller {
           .delete()
       }
 
-      const token = await AccessTokenManager.create({
-        user,
-        type: accessTokenTypeE('auth'),
-        expiresIn: setting.session.expiresIn,
-      })
+      const token = await accessTokenService.create(
+        {
+          user,
+          type: accessTokenTypeE('auth'),
+          expiresIn: setting.session.expiresIn,
+        },
+        {
+          client: trx,
+        }
+      )
+
+      await trx.commit()
 
       return {
-        token: serializeAccessToken(token),
+        token: token.serialize(),
         message: ctx.i18n.t('customer.auth.sign_in.success'),
       }
     } catch (error) {

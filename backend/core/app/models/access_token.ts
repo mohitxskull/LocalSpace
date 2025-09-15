@@ -46,4 +46,10 @@ export default class AccessToken extends BaseModel {
     foreignKey: dbRef.accessToken.tokenableIdC,
   })
   declare user: BelongsTo<typeof User>
+
+  // Extras =========================
+
+  isExpired(): boolean {
+    return this.expiresAt ? this.expiresAt < DateTime.now() : false
+  }
 }

@@ -11,13 +11,33 @@
         "invalid_credentials": "Invalid credentials",
         "disabled": "Sign in is currently disabled.",
         "success": "You have successfully signed in!",
-        "email_verification_required": "A confirmation link has been sent to your email. Please check your inbox to complete your registration."
+        "email_verification_required": "A confirmation link has been sent to your email. Please check your inbox to verify your email and complete your registration.",
+        "email_status_invalid": "There is a problem with your email address and it cannot receive emails. Please update your email to continue."
       },
       "password": {
         "update": {
           "invalid_password": "Invalid password",
           "success": "Password updated successfully"
+        },
+        "forgot": {
+          "success": "If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes."
+        },
+        "reset": {
+          "invalid_token": "This password reset token is invalid or has expired.",
+          "success": "Your password has been reset successfully."
         }
+      },
+      "verify": {
+        "disabled": "Email verification is currently disabled.",
+        "invalid": "Invalid verification token",
+        "already_verified": "Email already verified",
+        "success": "Email verified successfully!",
+        "resend_success": "A new verification link has been sent to your email address."
+      },
+      "update_email": {
+        "invalid_token": "This token is invalid or has expired.",
+        "email_in_use": "This email address is already in use.",
+        "success": "Your email has been updated. A verification link has been sent to your new email address."
       }
     }
   }

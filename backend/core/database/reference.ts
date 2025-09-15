@@ -1,4 +1,4 @@
-import { DBReference } from '@localspace/node-lib'
+import { DBReference, TableReference } from '@localspace/node-lib'
 
 const dbStructure = {
   user: {
@@ -6,26 +6,9 @@ const dbStructure = {
     columns: {
       id: 'id',
       name: 'name',
+      role: 'role',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-    },
-  },
-  role: {
-    name: 'roles',
-    columns: {
-      id: 'id',
-      name: 'name',
-    },
-  },
-  membership: {
-    name: 'memberships',
-    pivot: {
-      pivotTable: 'memberships',
-    },
-    columns: {
-      id: 'id',
-      userId: 'user_id',
-      roleId: 'role_id',
     },
   },
   credential: {
@@ -36,25 +19,24 @@ const dbStructure = {
       type: 'type',
       identifier: 'identifier',
       password: 'password',
-      updatedAt: 'updated_at',
       createdAt: 'created_at',
-      usedAt: 'used_at',
-      verifiedAt: 'verified_at',
+      updatedAt: 'updated_at',
     },
   },
-  permission: {
-    name: 'permissions',
+  credentialVerification: {
+    name: 'credential_verifications',
     columns: {
-      id: 'id',
-      resourceId: 'resource_id',
-      actions: 'actions',
-      userId: 'user_id',
+      credentialId: 'credential_id',
+      token: 'token',
+      expiresAt: 'expires_at',
+      verifiedAt: 'verified_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     },
   },
   customerProfile: {
     name: 'customer_profiles',
     columns: {
-      id: 'id',
       userId: 'user_id',
       email: 'email',
       updatedAt: 'updated_at',
@@ -63,22 +45,44 @@ const dbStructure = {
   adminProfile: {
     name: 'admin_profiles',
     columns: {
-      id: 'id',
       userId: 'user_id',
       email: 'email',
       updatedAt: 'updated_at',
     },
   },
-
-  document: {
-    name: 'documents',
+  workspace: {
+    name: 'workspaces',
+    columns: {
+      id: 'id',
+      name: 'name',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  },
+  workspaceMember: {
+    name: 'workspace_members',
+    columns: {
+      userId: 'user_id',
+      workspaceId: 'workspace_id',
+      role: 'role',
+      joinedAt: 'joined_at',
+    },
+    pivot: {
+      pivotTable: 'workspace_members',
+      pivotForeignKey: 'user_id',
+      pivotRelatedForeignKey: 'workspace_id',
+      pivotColumns: ['role', 'joined_at'],
+    },
+  },
+  permissions: {
+    name: 'permissions',
     columns: {
       id: 'id',
       userId: 'user_id',
-      title: 'title',
-      content: 'content',
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
+      resourceType: 'resource_type',
+      resourceId: 'resource_id',
+      actions: 'actions',
+      grantedAt: 'granted_at',
     },
   },
   accessToken: {
@@ -104,6 +108,6 @@ const dbStructure = {
       expire: 'expire',
     },
   },
-} as const
+} as const satisfies TableReference
 
 export const dbRef = DBReference.create(dbStructure)

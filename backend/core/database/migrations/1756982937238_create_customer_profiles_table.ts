@@ -7,12 +7,13 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (t) => {
-      t.increments(dbRef.customerProfile.id)
       t.string(dbRef.customerProfile.userId, ULID_LENGTH)
+        .primary()
         .notNullable()
         .references(dbRef.user.table.columns('id'))
         .onDelete('CASCADE')
       t.string(dbRef.customerProfile.email).notNullable()
+      t.timestamp(dbRef.customerProfile.updatedAt).notNullable()
     })
   }
 

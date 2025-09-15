@@ -32,12 +32,6 @@ export default class Credential extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime<true>
 
-  @column.dateTime()
-  declare usedAt: DateTime<true> | null
-
-  @column.dateTime()
-  declare verifiedAt: DateTime<true> | null
-
   // Hooks =============================
 
   @beforeSave()

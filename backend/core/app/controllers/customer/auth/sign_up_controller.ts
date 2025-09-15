@@ -7,10 +7,11 @@ import Credential from '#models/credential'
 import { dbRef } from '#database/reference'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
-import mail from '@adonisjs/mail/services/main'
+import { emailService } from '#services/email_service'
 import VerifyEmailNotification from '#mails/verify_email_notification'
-import { AccessTokenManager } from '#miscellaneous/access_token_manager'
+import { accessTokenService } from '#services/access_token_service'
 import { accessTokenTypeE, credentialTypeE } from '#types/literals'
+import limiter from '@adonisjs/limiter/services/main'
 
 export const input = vine.compile(
   vine.object({
@@ -29,21 +30,33 @@ export default class Controller {
 
     const payload = await ctx.request.validateUsing(input)
 
-    const credentialExist = await Credential.findBy({
-      [dbRef.credential.identifierC]: payload.email,
-      [dbRef.credential.typeC]: credentialTypeE('email'),
+    const signUpLimiter = limiter.use({
+      requests: 5,
+      duration: '1 day',
     })
 
-    if (credentialExist) {
-      throw new BadRequestException(ctx.i18n.t('customer.auth.sign_up.email_exists'), {
-        source: 'email',
-        reason: 'Email not found',
-      })
-    }
+    await signUpLimiter.consume(`customer_sign_up_${ctx.request.ip()}_${payload.email}`)
 
     const trx = await db.transaction()
 
     try {
+      const credentialExist = await Credential.findBy(
+        {
+          [dbRef.credential.identifierC]: payload.email,
+          [dbRef.credential.typeC]: credentialTypeE('email'),
+        },
+        {
+          client: trx,
+        }
+      )
+
+      if (credentialExist) {
+        throw new BadRequestException(ctx.i18n.t('customer.auth.sign_up.email_exists'), {
+          source: 'email',
+          reason: 'Email already exists',
+        })
+      }
+
       const user = await User.create(
         {
           name: payload.name,
@@ -63,16 +76,21 @@ export default class Controller {
         email: payload.email,
       })
 
-      const verificationRequired = setting.credential.email.verification.enabled
+      const emailVerificationRequired = setting.credential.email.verification.enabled
 
-      if (verificationRequired) {
-        const accessTokenHolder = await AccessTokenManager.create({
-          type: accessTokenTypeE('email_verification'),
-          user,
-          expiresIn: setting.credential.email.verification.expiresIn,
-        })
+      if (emailVerificationRequired) {
+        const accessTokenHolder = await accessTokenService.create(
+          {
+            type: accessTokenTypeE('email_verification'),
+            user,
+            expiresIn: setting.credential.email.verification.expiresIn,
+          },
+          {
+            client: trx,
+          }
+        )
 
-        await mail.sendLater(new VerifyEmailNotification({ user, credential, accessTokenHolder }))
+        await emailService.send(new VerifyEmailNotification({ user, credential, accessTokenHolder }))
       }
 
       await trx.commit()
@@ -80,13 +98,13 @@ export default class Controller {
       return {
         user: await user.transformer.serialize(),
         message: ctx.i18n.t(
-          verificationRequired
+          emailVerificationRequired
             ? 'customer.auth.sign_up.email_verification_required'
             : 'customer.auth.sign_up.success'
         ),
         meta: {
           email: {
-            verificationRequired,
+            verificationRequired: emailVerificationRequired,
           },
         },
       }

@@ -14,8 +14,7 @@ export default class Controller {
     return {
       message: 'pong',
       ip: ctx.request.ip(),
-      deviceId: ctx.deviceId,
-      isNewDevice: ctx.isNewDevice,
+
       name: payload?.name ?? 'Anonymous',
     }
   }

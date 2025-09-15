@@ -3,22 +3,24 @@ import { dbRef } from '#database/reference'
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = dbRef.membership.table.name
+  protected tableName = dbRef.workspaceMember.table.name
 
   async up() {
     this.schema.createTable(this.tableName, (t) => {
-      t.increments(dbRef.membership.id)
-
-      t.string(dbRef.membership.userId, ULID_LENGTH)
+      t.string(dbRef.workspaceMember.userId, ULID_LENGTH)
         .notNullable()
         .references(dbRef.user.table.columns('id'))
         .onDelete('CASCADE')
 
-      t.integer(dbRef.membership.roleId)
-        .unsigned()
+      t.string(dbRef.workspaceMember.workspaceId, ULID_LENGTH)
         .notNullable()
-        .references(dbRef.role.table.columns('id'))
+        .references(dbRef.workspace.table.columns('id'))
         .onDelete('CASCADE')
+
+      t.string(dbRef.workspaceMember.role).notNullable()
+      t.timestamp(dbRef.workspaceMember.joinedAt).notNullable()
+
+      t.primary([dbRef.workspaceMember.userId, dbRef.workspaceMember.workspaceId])
     })
   }
 
