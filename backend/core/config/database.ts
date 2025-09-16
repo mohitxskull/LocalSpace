@@ -12,7 +12,7 @@ const dbConfig = defineConfig({
         port: env.get('DB_PORT'),
         user: env.get('DB_USER'),
         password: env.get('DB_PASSWORD'),
-        database: `${env.get('APP_NAME')}_${env.get('NODE_ENV')}`,
+        database: env.get('DB_NAME'),
         ssl: env.get('DB_SSL') === false ? undefined : {},
       },
       migrations: {

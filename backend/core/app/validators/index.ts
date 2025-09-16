@@ -1,5 +1,5 @@
 import vine from '@vinejs/vine'
-import { accessTokenTypeC, credentialTypeC } from '#types/literals'
+import { tokenTypeC, credentialTypeC } from '#types/literals'
 
 export const PageS = () => vine.number().min(1).max(100)
 
@@ -15,4 +15,4 @@ export const HashS = () =>
 
 export const CredentialTypeS = () => vine.enum(credentialTypeC)
 
-export const AccessTokenTypeS = () => vine.enum(accessTokenTypeC)
+export const TokenTypeS = () => vine.enum(tokenTypeC)

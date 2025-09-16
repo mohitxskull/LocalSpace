@@ -1,4 +1,3 @@
-import User from '#models/user'
 import { RoleT } from '#types/literals'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
@@ -21,12 +20,8 @@ export default class AuthMiddleware {
     if (options?.roles) {
       const user = ctx.auth.getUserOrFail()
 
-      const userRoles = await User.cacher.roles({ user }).get()
-
-      for (const requiredRole of options.roles) {
-        if (!userRoles.includes(requiredRole)) {
-          throw new ForbiddenException()
-        }
+      if (!options.roles.includes(user.role)) {
+        throw new ForbiddenException()
       }
     }
 

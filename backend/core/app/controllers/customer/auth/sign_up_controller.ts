@@ -7,10 +7,10 @@ import Credential from '#models/credential'
 import { dbRef } from '#database/reference'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
-import { emailService } from '#services/email_service'
+import mail from '@adonisjs/mail/services/main'
 import VerifyEmailNotification from '#mails/verify_email_notification'
-import { accessTokenService } from '#services/access_token_service'
-import { accessTokenTypeE, credentialTypeE } from '#types/literals'
+import tokenService from '#services/token_service'
+import { tokenTypeE, credentialTypeE, roleE } from '#types/literals'
 import limiter from '@adonisjs/limiter/services/main'
 
 export const input = vine.compile(
@@ -60,6 +60,7 @@ export default class Controller {
       const user = await User.create(
         {
           name: payload.name,
+          role: roleE('customer'),
         },
         {
           client: trx,
@@ -79,9 +80,9 @@ export default class Controller {
       const emailVerificationRequired = setting.credential.email.verification.enabled
 
       if (emailVerificationRequired) {
-        const accessTokenHolder = await accessTokenService.create(
+        const accessTokenHolder = await tokenService.create(
           {
-            type: accessTokenTypeE('email_verification'),
+            type: tokenTypeE('email_verification'),
             user,
             expiresIn: setting.credential.email.verification.expiresIn,
           },
@@ -90,7 +91,7 @@ export default class Controller {
           }
         )
 
-        await emailService.send(new VerifyEmailNotification({ user, credential, accessTokenHolder }))
+        await mail.sendLater(new VerifyEmailNotification({ user, credential, accessTokenHolder }))
       }
 
       await trx.commit()

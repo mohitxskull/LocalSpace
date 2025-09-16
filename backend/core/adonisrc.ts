@@ -67,6 +67,7 @@ export default defineConfig({
     () => import('@julr/adonisjs-prometheus/prometheus_provider'),
     () => import('@adonisjs/cache/cache_provider'),
     () => import('@adonisjs/i18n/i18n_provider'),
+    () => import('@adonisjs/core/providers/edge_provider'),
   ],
 
   /*
@@ -104,6 +105,11 @@ export default defineConfig({
         name: 'functional',
         timeout: 30000,
       },
+      {
+        files: ['tests/browser/**/*.spec(.ts|.js)'],
+        name: 'browser',
+        timeout: 300000,
+      },
     ],
     forceExit: false,
   },
@@ -111,9 +117,14 @@ export default defineConfig({
   directories: {
     jobs: 'app/jobs',
   },
+
   metaFiles: [
     {
       pattern: 'resources/lang/**/*.{json,yaml,yml}',
+      reloadServer: false,
+    },
+    {
+      pattern: 'resources/views/**/*.edge',
       reloadServer: false,
     },
   ],

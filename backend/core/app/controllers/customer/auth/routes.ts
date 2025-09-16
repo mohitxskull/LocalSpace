@@ -17,11 +17,9 @@ export const customerAuthRoutes = () => {
         .use([middleware.captcha()])
 
       router
-        .post('verify/resend', [() => import('#controllers/customer/auth/verify_resend_controller')])
-        .use([middleware.captcha()])
-
-      router
-        .post('update-email', [() => import('#controllers/customer/auth/update_email_controller')])
+        .post('verify/resend', [
+          () => import('#controllers/customer/auth/verify_resend_controller'),
+        ])
         .use([middleware.captcha()])
 
       router
@@ -49,8 +47,13 @@ export const customerAuthRoutes = () => {
               }),
             ])
 
-          router.post('forgot', [() => import('#controllers/customer/auth/password/forgot_controller')])
-          router.post('reset', [() => import('#controllers/customer/auth/password/reset_controller')])
+          router
+            .post('forgot', [() => import('#controllers/customer/auth/password/forgot_controller')])
+            .use([middleware.captcha()])
+
+          router
+            .post('reset', [() => import('#controllers/customer/auth/password/reset_controller')])
+            .use([middleware.captcha()])
         })
         .prefix('password')
     })

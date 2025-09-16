@@ -3,10 +3,10 @@ import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import { dbRef } from '#database/reference'
 import User from './user.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { type AccessTokenTypeT } from '#types/literals'
+import { type TokenTypeT } from '#types/literals'
 
-export default class AccessToken extends BaseModel {
-  static table = dbRef.accessToken.table.name
+export default class Token extends BaseModel {
+  static table = dbRef.token.table.name
 
   // Columns ===========================
 
@@ -17,7 +17,7 @@ export default class AccessToken extends BaseModel {
   declare tokenableId: string
 
   @column()
-  declare type: AccessTokenTypeT
+  declare type: TokenTypeT
 
   @column()
   declare name: string | null
@@ -43,7 +43,7 @@ export default class AccessToken extends BaseModel {
   // Relations =========================
 
   @belongsTo(() => User, {
-    foreignKey: dbRef.accessToken.tokenableIdC,
+    foreignKey: dbRef.token.tokenableIdC,
   })
   declare user: BelongsTo<typeof User>
 

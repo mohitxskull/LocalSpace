@@ -8,9 +8,11 @@ import { dbRef } from '#database/reference'
 import hash from '@adonisjs/core/services/hash'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
-import AccessToken from '#models/access_token'
-import { accessTokenTypeE, credentialTypeE } from '#types/literals'
+import Token from '#models/token'
+import { tokenTypeE, credentialTypeE } from '#types/literals'
 import limiter from '@adonisjs/limiter/services/main'
+import CredentialVerification from '#models/credential_verification'
+import tokenService from '#services/token_service'
 
 export const input = vine.compile(
   vine.object({
@@ -69,69 +71,53 @@ export default class Controller {
 
       const user = credential.user
 
-      if (credential.status === 'bounced' || credential.status === 'complained') {
-        const emailUpdateToken = await accessTokenService.create(
-          {
-            type: accessTokenTypeE('email_update'),
-            user: credential.user,
-            expiresIn: '15m',
-          },
-          {
-            deleteIfExists: true,
-            client: trx,
-          }
-        )
-        throw new ForbiddenException(ctx.i18n.t('customer.auth.sign_in.email_status_invalid'), {
-          code: 'EMAIL_STATUS_INVALID',
-          metadata: {
-            emailUpdateToken: emailUpdateToken.getValueOrFail().release(),
-          },
-        })
-      }
-
       const emailVerificationRequired = setting.credential.email.verification.enabled
 
-      if (emailVerificationRequired && !credential.verifiedAt) {
-        throw new BadRequestException(
-          ctx.i18n.t('customer.auth.sign_in.email_verification_required'),
-          {
-            code: 'EMAIL_NOT_VERIFIED',
-            source: 'email',
-            reason: 'Email verification is required',
-          }
-        )
+      if (emailVerificationRequired) {
+        const credentialVerification = await CredentialVerification.find(credential.id)
+
+        if (!credentialVerification || !credentialVerification.verifiedAt) {
+          throw new BadRequestException(
+            ctx.i18n.t('customer.auth.sign_in.email_verification_required'),
+            {
+              code: 'EMAIL_NOT_VERIFIED',
+              source: 'email',
+              reason: 'Email verification is required',
+            }
+          )
+        }
       }
 
       credential.usedAt = DateTime.now()
 
       await credential.save()
 
-      const existingAuthAccessTokens = await AccessToken.query({ client: trx }).where({
-        [dbRef.accessToken.tokenableId]: user.id,
-        [dbRef.accessToken.type]: accessTokenTypeE('auth'),
+      const existingAccessTokens = await Token.query({ client: trx }).where({
+        [dbRef.token.tokenableId]: user.id,
+        [dbRef.token.type]: tokenTypeE('access'),
       })
 
       const maxTokensAfterNewOne = setting.session.max
-      const currentTokenCount = existingAuthAccessTokens.length
+      const currentTokenCount = existingAccessTokens.length
       const tokensToDeleteCount = Math.max(0, currentTokenCount - maxTokensAfterNewOne + 1)
 
       if (tokensToDeleteCount > 0) {
-        const tokensToDelete = existingAuthAccessTokens
+        const tokensToDelete = existingAccessTokens
           .sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis())
           .slice(0, tokensToDeleteCount)
 
-        await AccessToken.query({ client: trx })
+        await Token.query({ client: trx })
           .whereIn(
-            dbRef.accessToken.id,
+            dbRef.token.id,
             tokensToDelete.map((token) => token.id)
           )
           .delete()
       }
 
-      const token = await accessTokenService.create(
+      const token = await tokenService.create(
         {
           user,
-          type: accessTokenTypeE('auth'),
+          type: tokenTypeE('access'),
           expiresIn: setting.session.expiresIn,
         },
         {

@@ -2,7 +2,7 @@ import type { ApplicationService } from '@adonisjs/core/types'
 import logger from '@adonisjs/core/services/logger'
 import ace from '@adonisjs/core/services/ace'
 import db from '@adonisjs/lucid/services/db'
-import AccessTokenModule from '#modules/access_token_module'
+import TokenModule from '#modules/token_module'
 
 export default class BootProvider {
   constructor(protected app: ApplicationService) {
@@ -17,10 +17,10 @@ export default class BootProvider {
    * Register bindings to the container
    */
   register() {
-    this.app.container.singleton(AccessTokenModule, () => {
-      return new AccessTokenModule()
+    this.app.container.singleton(TokenModule, () => {
+      return new TokenModule()
     })
-    this.app.container.alias('access-token', AccessTokenModule)
+    this.app.container.alias('token', TokenModule)
   }
 
   /**
@@ -78,6 +78,6 @@ export default class BootProvider {
 
 declare module '@adonisjs/core/types' {
   interface ContainerBindings {
-    'access-token': AccessTokenModule
+    token: TokenModule
   }
 }

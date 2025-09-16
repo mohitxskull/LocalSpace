@@ -13,8 +13,8 @@ import CustomerProfile from './customer_profile.js'
 import AdminProfile from './admin_profile.js'
 import { UserTransformer } from '#transformers/user'
 import { setting } from '#config/setting'
-import AccessToken from './access_token.js'
-import { accessTokenTypeE, type RoleT } from '#types/literals'
+import Token from './token.js'
+import { tokenTypeE, type RoleT } from '#types/literals'
 import cache from '@adonisjs/cache/services/main'
 import { UserCacher } from '../cacher/user.js'
 import Workspace from './workspace.js'
@@ -62,8 +62,8 @@ export default class User extends BaseModel {
   @hasOne(() => AdminProfile)
   declare adminProfile: HasOne<typeof AdminProfile>
 
-  @hasMany(() => AccessToken)
-  declare accessTokens: HasMany<typeof AccessToken>
+  @hasMany(() => Token)
+  declare tokens: HasMany<typeof Token>
 
   @manyToMany(() => Workspace, dbRef.workspaceMember.table.pivot())
   declare workspaces: ManyToMany<typeof Workspace>
@@ -73,10 +73,10 @@ export default class User extends BaseModel {
 
   // Extra =============================
 
-  static authAccessTokens = DbAccessTokensProvider.forModel(User, {
+  static accessTokens = DbAccessTokensProvider.forModel(User, {
     expiresIn: setting.session.expiresIn,
-    type: accessTokenTypeE('auth'),
-    table: dbRef.accessToken.table.name,
+    type: tokenTypeE('access'),
+    table: dbRef.token.table.name,
     tokenSecretLength: 42,
   })
 

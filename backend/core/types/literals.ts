@@ -3,11 +3,11 @@ const identityOf =
   <const U extends T>(value: U) =>
     value
 
-export const accessTokenTypeC = ['auth'] as const
+export const tokenTypeC = ['access', 'email_verification', 'password_reset'] as const
 
-export type AccessTokenTypeT = (typeof accessTokenTypeC)[number]
+export type TokenTypeT = (typeof tokenTypeC)[number]
 
-export const accessTokenTypeE = identityOf<AccessTokenTypeT>()
+export const tokenTypeE = identityOf<TokenTypeT>()
 
 // ===================================
 

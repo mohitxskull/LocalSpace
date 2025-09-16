@@ -4,7 +4,7 @@ import User from '#models/user'
 import env from '#start/env'
 import router from '@adonisjs/core/services/router'
 import { BaseMail } from '@adonisjs/mail'
-import { AccessTokenHolder } from '#miscellaneous/access_token_manager'
+import { TokenHolder as AccessTokenHolder } from '#modules/token_module'
 
 export default class PasswordResetNotification extends BaseMail {
   subject = 'Reset your password'

@@ -18,6 +18,7 @@ export default class extends BaseSchema {
       t.string(dbRef.credential.identifier).notNullable()
       t.string(dbRef.credential.password).notNullable()
 
+      t.timestamp(dbRef.credential.usedAt).nullable()
       t.timestamp(dbRef.credential.createdAt).notNullable()
       t.timestamp(dbRef.credential.updatedAt).notNullable()
 

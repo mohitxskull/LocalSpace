@@ -8,77 +8,110 @@ import type { MakeTuyauRequest, MakeTuyauResponse } from '@tuyau/utils/types'
 import type { InferInput } from '@vinejs/vine/types'
 
 type ApiV1CustomerAuthSigninPost = {
-  request: MakeTuyauRequest<
-    InferInput<(typeof import('../app/controllers/customer/auth/sign_in_controller.ts'))['input']>
-  >
-  response: MakeTuyauResponse<
-    import('../app/controllers/customer/auth/sign_in_controller.ts').default['handle'],
-    true
-  >
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/sign_in_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/sign_in_controller.ts').default['handle'], true>
 }
 type ApiV1CustomerAuthSignupPost = {
-  request: MakeTuyauRequest<
-    InferInput<(typeof import('../app/controllers/customer/auth/sign_up_controller.ts'))['input']>
-  >
-  response: MakeTuyauResponse<
-    import('../app/controllers/customer/auth/sign_up_controller.ts').default['handle'],
-    true
-  >
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/sign_up_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/sign_up_controller.ts').default['handle'], true>
+}
+type ApiV1CustomerAuthVerifyPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/verify_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/verify_controller.ts').default['handle'], true>
+}
+type ApiV1CustomerAuthVerifyResendPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/verify_resend_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/verify_resend_controller.ts').default['handle'], true>
 }
 type ApiV1CustomerAuthProfileGetHead = {
   request: unknown
-  response: MakeTuyauResponse<
-    import('../app/controllers/customer/auth/profile/show_controller.ts').default['handle'],
-    false
-  >
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/profile/show_controller.ts').default['handle'], false>
+}
+type ApiV1CustomerAuthPasswordUpdatePost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/password/update_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/password/update_controller.ts').default['handle'], true>
+}
+type ApiV1CustomerAuthPasswordForgotPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/password/forgot_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/password/forgot_controller.ts').default['handle'], true>
+}
+type ApiV1CustomerAuthPasswordResetPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/customer/auth/password/reset_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/customer/auth/password/reset_controller.ts').default['handle'], true>
 }
 type ApiV1PingGetHead = {
-  request: MakeTuyauRequest<
-    InferInput<(typeof import('../app/controllers/ping_controller.ts'))['input']>
-  >
-  response: MakeTuyauResponse<
-    import('../app/controllers/ping_controller.ts').default['handle'],
-    true
-  >
+  request: MakeTuyauRequest<InferInput<typeof import('../app/controllers/ping_controller.ts')['input']>>
+  response: MakeTuyauResponse<import('../app/controllers/ping_controller.ts').default['handle'], true>
 }
 export interface ApiDefinition {
-  api: {
-    v1: {
-      customer: {
-        auth: {
+  'api': {
+    'v1': {
+      'customer': {
+        'auth': {
           'sign-in': {
-            $url: {}
-            $post: ApiV1CustomerAuthSigninPost
-          }
+            '$url': {
+            };
+            '$post': ApiV1CustomerAuthSigninPost;
+          };
           'sign-up': {
-            $url: {}
-            $post: ApiV1CustomerAuthSignupPost
-          }
+            '$url': {
+            };
+            '$post': ApiV1CustomerAuthSignupPost;
+          };
+          'verify': {
+            '$url': {
+            };
+            '$post': ApiV1CustomerAuthVerifyPost;
+            'resend': {
+              '$url': {
+              };
+              '$post': ApiV1CustomerAuthVerifyResendPost;
+            };
+          };
           'profile': {
-            $url: {}
-            $get: ApiV1CustomerAuthProfileGetHead
-            $head: ApiV1CustomerAuthProfileGetHead
-          }
-        }
-      }
-      ping: {
-        $url: {}
-        $get: ApiV1PingGetHead
-        $head: ApiV1PingGetHead
-      }
-    }
-  }
+            '$url': {
+            };
+            '$get': ApiV1CustomerAuthProfileGetHead;
+            '$head': ApiV1CustomerAuthProfileGetHead;
+          };
+          'password': {
+            'update': {
+              '$url': {
+              };
+              '$post': ApiV1CustomerAuthPasswordUpdatePost;
+            };
+            'forgot': {
+              '$url': {
+              };
+              '$post': ApiV1CustomerAuthPasswordForgotPost;
+            };
+            'reset': {
+              '$url': {
+              };
+              '$post': ApiV1CustomerAuthPasswordResetPost;
+            };
+          };
+        };
+      };
+      'ping': {
+        '$url': {
+        };
+        '$get': ApiV1PingGetHead;
+        '$head': ApiV1PingGetHead;
+      };
+    };
+  };
 }
 const routes = [
   {
     params: [],
     name: 'prometheus.metrics',
     path: '/metrics',
-    method: ['GET', 'HEAD'],
+    method: ["GET","HEAD"],
     types: {} as unknown,
   },
-] as const
+] as const;
 export const api = {
   routes,
-  definition: {} as ApiDefinition,
+  definition: {} as ApiDefinition
 }

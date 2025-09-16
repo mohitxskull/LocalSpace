@@ -19,6 +19,7 @@ const dbStructure = {
       type: 'type',
       identifier: 'identifier',
       password: 'password',
+      usedAt: 'used_at',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     },
@@ -27,8 +28,6 @@ const dbStructure = {
     name: 'credential_verifications',
     columns: {
       credentialId: 'credential_id',
-      token: 'token',
-      expiresAt: 'expires_at',
       verifiedAt: 'verified_at',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -85,8 +84,8 @@ const dbStructure = {
       grantedAt: 'granted_at',
     },
   },
-  accessToken: {
-    name: 'access_tokens',
+  token: {
+    name: 'tokens',
     columns: {
       id: 'id',
       tokenableId: 'tokenable_id',

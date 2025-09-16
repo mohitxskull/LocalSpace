@@ -1,9 +1,9 @@
 import { dbRef } from '#database/reference'
 import Credential from '#models/credential'
-import { accessTokenTypeE } from '#types/literals'
+import { tokenTypeE } from '#types/literals'
 import { CustomerPasswordS } from '#validators/customer'
 import type { HttpContext } from '@adonisjs/core/http'
-import { accessTokenService } from '#services/access_token_service'
+import tokenService from '#services/token_service'
 import vine from '@vinejs/vine'
 import { ForbiddenException } from '@localspace/node-lib/exception'
 import db from '@adonisjs/lucid/services/db'
@@ -22,10 +22,10 @@ export default class Controller {
     const trx = await db.transaction()
 
     try {
-      const accessTokenHolder = await accessTokenService.verify(
+      const accessTokenHolder = await tokenService.verify(
         {
           token: payload.token,
-          type: accessTokenTypeE('password_reset'),
+          type: tokenTypeE('password_reset'),
         },
         {
           client: trx,
