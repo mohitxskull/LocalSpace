@@ -74,7 +74,9 @@ export default class Controller {
       const emailVerificationRequired = setting.credential.email.verification.enabled
 
       if (emailVerificationRequired) {
-        const credentialVerification = await CredentialVerification.find(credential.id)
+        const credentialVerification = await CredentialVerification.find(credential.id, {
+          client: trx,
+        })
 
         if (!credentialVerification || !credentialVerification.verifiedAt) {
           throw new BadRequestException(
