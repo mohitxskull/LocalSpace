@@ -5,22 +5,25 @@ import { NotFoundException, BadRequestException } from '@localspace/node-lib/exc
 import { credentialTypeE, workspaceMemberRoleE } from '#types/literals'
 import Credential from '#models/credential'
 import { dbRef } from '#database/reference'
+import { ULIDS } from '#validators/index'
 
-const addMemberInput = vine.compile(
+export const validator = vine.compile(
   vine.object({
     email: vine.string().email(),
+    params: vine.object({
+      workspaceId: ULIDS(),
+    }),
   })
 )
 
 export default class StoreController {
-  async handle({ bouncer, params, request, i18n }: HttpContext) {
-    const workspace = await Workspace.findOrFail(params.workspaceId)
+  async handle({ bouncer, request, i18n }: HttpContext) {
+    const payload = await request.validateUsing(validator)
+    const workspace = await Workspace.findOrFail(payload.params.workspaceId)
     await bouncer.with('WorkspacePolicy').authorize('manageMembers', workspace)
 
-    const { email } = await request.validateUsing(addMemberInput)
-
     const credential = await Credential.query()
-      .where(dbRef.credential.identifier, email)
+      .where(dbRef.credential.identifier, payload.email)
       .andWhere(dbRef.credential.type, credentialTypeE('email'))
       .preload('user')
       .first()

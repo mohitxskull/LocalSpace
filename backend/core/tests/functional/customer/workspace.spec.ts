@@ -2,7 +2,7 @@ import { test } from '@japa/runner'
 import { UserFactory } from '#database/factories/user_factory'
 import User from '#models/user'
 import Workspace from '#models/workspace'
-import { workspaceMemberRoleE } from '#types/literals'
+import { blogStatusE, workspaceMemberRoleE } from '#types/literals'
 import testUtils from '@adonisjs/core/services/test_utils'
 
 test.group('Workspace', (group) => {
@@ -208,5 +208,31 @@ test.group('Workspace', (group) => {
       .where('user_id', memberToRemove.id)
       .first()
     assert.isNull(member)
+  })
+})
+
+test.group('Blog', (group) => {
+  let user: User
+  let workspace: Workspace
+
+  group.each.setup(async () => {
+    await testUtils.db().truncate()
+    user = await UserFactory.create()
+    workspace = await Workspace.create({ name: 'Blog Test Workspace' })
+    await workspace
+      .related('members')
+      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
+  })
+
+  test('owner can create a blog', async ({ client, assert }) => {
+    const response = await client
+      .post(`/api/v1/customer/workspace/${workspace.id}/blog`)
+      .loginAs(user)
+      .json({ title: 'My First Blog', content: 'This is the content.' })
+
+    response.assertStatus(200)
+    assert.exists(response.body().blog.id)
+    assert.equal(response.body().blog.title, 'My First Blog')
+    assert.equal(response.body().blog.status, blogStatusE('draft'))
   })
 })

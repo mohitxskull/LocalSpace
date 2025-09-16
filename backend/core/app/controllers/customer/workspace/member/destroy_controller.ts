@@ -1,10 +1,22 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Workspace from '#models/workspace'
 import { BadRequestException } from '@localspace/node-lib/exception'
+import vine from '@vinejs/vine'
+import { ULIDS } from '#validators/index'
+
+export const validator = vine.compile(
+  vine.object({
+    params: vine.object({
+      workspaceId: ULIDS(),
+      memberId: ULIDS(),
+    }),
+  })
+)
 
 export default class DestroyController {
-  async handle({ bouncer, params, auth, i18n }: HttpContext) {
+  async handle({ bouncer, auth, i18n, request }: HttpContext) {
     const user = auth.getUserOrFail()
+    const { params } = await request.validateUsing(validator)
     const workspace = await Workspace.findOrFail(params.workspaceId)
     await bouncer.with('WorkspacePolicy').authorize('manageMembers', workspace)
 

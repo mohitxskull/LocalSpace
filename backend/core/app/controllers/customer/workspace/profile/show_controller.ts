@@ -1,66 +1,33 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Workspace from '#models/workspace'
-import { workspaceMemberRoleE } from '#types/literals'
-import Permission from '#models/permission'
-import riManager from '#services/ri_service'
+import vine from '@vinejs/vine'
+import { ULIDS } from '#validators/index'
+import { dbRef } from '#database/reference'
 
-export default class ShowController {
-  async handle({ auth, bouncer, params }: HttpContext) {
+export const input = vine.compile(
+  vine.object({
+    params: vine.object({
+      workspaceId: ULIDS(),
+    }),
+  })
+)
+
+export default class Controller {
+  async handle({ auth, bouncer, request }: HttpContext) {
     const user = auth.getUserOrFail()
-    const workspace = await Workspace.findOrFail(params.workspaceId)
+    const payload = await request.validateUsing(input)
+    const workspace = await Workspace.findOrFail(payload.params.workspaceId)
 
     await bouncer.with('WorkspacePolicy').authorize('view', workspace)
 
     const member = await workspace
       .related('members')
       .query()
-      .where('user_id', user.id)
+      .where(dbRef.workspaceMember.userId, user.id)
       .firstOrFail()
 
-    if (member.role === workspaceMemberRoleE('owner')) {
-      return {
-        role: 'owner',
-        permissions: { all: true },
-      }
+    return {
+      member: await member.transformer.serialize(),
     }
-
-    const userPermissions = await Permission.query().where('user_id', user.id)
-    const response: any = {
-      role: 'member',
-      permissions: {
-        workspace: [],
-        blogs: {},
-      },
-    }
-
-    for (const p of userPermissions) {
-      const parsed = riManager.parse(p.riPattern)
-      if (!parsed.valid) continue
-
-      const workspacePart = parsed.parts[0]
-      if (
-        !workspacePart ||
-        workspacePart.type !== 'workspace' ||
-        workspacePart.id !== workspace.id
-      ) {
-        continue
-      }
-
-      const actions = p.actions
-
-      if (parsed.parts.length === 1) {
-        response.permissions.workspace.push(...actions)
-      } else if (parsed.parts.length === 2 && parsed.parts[1].type === 'blog') {
-        const blogId = parsed.parts[1].id
-        if (blogId && blogId !== '*') {
-          if (!response.permissions.blogs[blogId]) {
-            response.permissions.blogs[blogId] = []
-          }
-          response.permissions.blogs[blogId].push(...actions)
-        }
-      }
-    }
-
-    return response
   }
 }

@@ -3,6 +3,16 @@ const identityOf =
   <const U extends T>(value: U) =>
     value
 
+// ===================================
+
+export const directionC = ['asc', 'desc'] as const
+
+export type DirectionT = (typeof directionC)[number]
+
+export const directionE = identityOf<DirectionT>()
+
+// ===================================
+
 export const tokenTypeC = ['access', 'email_verification', 'password_reset'] as const
 
 export type TokenTypeT = (typeof tokenTypeC)[number]
@@ -48,3 +58,5 @@ export const blogStatusC = ['draft', 'published', 'archived'] as const
 export type BlogStatusT = (typeof blogStatusC)[number]
 
 export const blogStatusE = identityOf<BlogStatusT>()
+
+// ===================================

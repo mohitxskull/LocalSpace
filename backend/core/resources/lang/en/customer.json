@@ -64,6 +64,11 @@
       "update": {
         "success": "Permissions updated successfully."
       }
+    },
+    "blog": {
+      "delete": {
+        "success": "Blog deleted successfully."
+      }
     }
   }
 }

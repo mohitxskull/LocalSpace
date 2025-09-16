@@ -4,8 +4,9 @@ import vine from '@vinejs/vine'
 import db from '@adonisjs/lucid/services/db'
 import Permission from '#models/permission'
 import User from '#models/user'
+import { ULIDS } from '#validators/index'
 
-const input = vine.compile(
+export const input = vine.compile(
   vine.object({
     grants: vine.array(
       vine.object({
@@ -13,23 +14,27 @@ const input = vine.compile(
         actions: vine.array(vine.string()),
       })
     ),
+    params: vine.object({
+      workspaceId: ULIDS(),
+      memberId: ULIDS(),
+    }),
   })
 )
 
-export default class UpdateController {
-  async handle({ bouncer, params, request, i18n }: HttpContext) {
-    const workspace = await Workspace.findOrFail(params.workspaceId)
+export default class Controller {
+  async handle({ bouncer, request, i18n }: HttpContext) {
+    const payload = await request.validateUsing(input)
+    const workspace = await Workspace.findOrFail(payload.params.workspaceId)
     await bouncer.with('WorkspacePolicy').authorize('manageMembers', workspace)
 
-    const member = await User.findOrFail(params.memberId)
-    const { grants } = await request.validateUsing(input)
+    const member = await User.findOrFail(payload.params.memberId)
 
     const trx = await db.transaction()
 
     try {
-      await Permission.query().useTransaction(trx).where('user_id', member.id).delete()
+      await Permission.query({ client: trx }).where('user_id', member.id).delete()
 
-      for (const grant of grants) {
+      for (const grant of payload.grants) {
         if (grant.actions.length > 0) {
           await Permission.create(
             {

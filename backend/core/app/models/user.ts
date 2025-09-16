@@ -20,7 +20,10 @@ import { UserCacher } from '../cacher/user.js'
 import Workspace from './workspace.js'
 import WorkspaceMember from './workspace_member.js'
 import Blog from './blog.js'
+import { QueryClientContract } from '@adonisjs/lucid/types/database'
 import riManager from '#services/ri_service'
+import { RIManager } from '@localspace/node-lib'
+import logger from '@adonisjs/core/services/logger'
 
 export default class User extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -97,13 +100,54 @@ export default class User extends BaseModel {
     return new UserCacher(User, cache.namespace(this.table))
   }
 
-  async hasPermission(ri: string, action: string): Promise<boolean> {
-    const permissions = await this.related('permissions').query()
-    for (const p of permissions) {
-      if (riManager.matches(p.riPattern, ri) && p.actions.includes(action)) {
-        return true
+  async hasPermission(
+    params: { riPattern: string; actions: string[] },
+    options?: { client?: QueryClientContract; allowPrefixMatch?: boolean }
+  ) {
+    const duplicates = params.actions.filter(
+      (action, index) => params.actions.indexOf(action) !== index
+    )
+
+    if (duplicates.length > 0) {
+      throw new Error('Duplicate Actions', { cause: { duplicates, params } })
+    }
+
+    const parsedRI = riManager.parse(params.riPattern)
+
+    if (!parsedRI.valid) {
+      throw new Error('Invalid RI', { cause: parsedRI })
+    }
+
+    if (!params.actions.every((action) => parsedRI.actions.includes(action))) {
+      throw new Error('Invalid Action', { cause: { parsedRI, params } })
+    }
+
+    const permissions = await User.cacher
+      .permissions({ user: this }, { client: options?.client })
+      .get()
+
+    let result = false
+
+    for (const permission of permissions) {
+      const riMatches = riManager.matches(permission.riPattern, params.riPattern, {
+        allowPrefixMatch: options?.allowPrefixMatch,
+      })
+
+      if (riMatches) {
+        const hasWildcard = permission.actions.includes(RIManager.WILDCARD)
+        const hasAllActions = params.actions.every((requestedAction) =>
+          permission.actions.includes(requestedAction)
+        )
+
+        if (hasWildcard || hasAllActions) {
+          result = true
+          break
+        }
       }
     }
-    return false
+
+    logger.debug({ params, options, result }, 'Has Permission')
+
+    return result
   }
 }

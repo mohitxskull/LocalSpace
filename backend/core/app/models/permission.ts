@@ -4,9 +4,10 @@ import User from './user.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import { JSONColumn } from '@localspace/node-lib/column/json'
+import { PermissionTransformer } from '#transformers/permission'
 
 export default class Permission extends BaseModel {
-  static table = dbRef.permissions.table.name
+  static table = dbRef.permission.table.name
 
   @column({ isPrimary: true })
   declare id: number
@@ -27,4 +28,8 @@ export default class Permission extends BaseModel {
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
+
+  get transformer() {
+    return new PermissionTransformer(this)
+  }
 }

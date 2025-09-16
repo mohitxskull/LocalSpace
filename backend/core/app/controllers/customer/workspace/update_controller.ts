@@ -1,22 +1,31 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Workspace from '#models/workspace'
 import vine from '@vinejs/vine'
+import { ULIDS } from '#validators/index'
+import { WorkspaceNameS } from '#validators/workspace'
 
-const input = vine.compile(
+export const validator = vine.compile(
   vine.object({
-    name: vine.string().minLength(2).maxLength(50),
+    params: vine.object({
+      workspaceId: ULIDS(),
+    }),
+
+    name: WorkspaceNameS().optional(),
   })
 )
 
 export default class UpdateController {
-  async handle({ bouncer, params, request }: HttpContext) {
-    const workspace = await Workspace.findOrFail(params.workspaceId)
+  async handle({ bouncer, request }: HttpContext) {
+    const payload = await request.validateUsing(validator)
+
+    const workspace = await Workspace.findOrFail(payload.params.workspaceId)
 
     await bouncer.with('WorkspacePolicy').authorize('update', workspace)
 
-    const { name } = await request.validateUsing(input)
+    if (payload.name) {
+      workspace.name = payload.name
+    }
 
-    workspace.name = name
     await workspace.save()
 
     return {

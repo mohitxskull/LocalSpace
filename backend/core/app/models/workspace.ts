@@ -9,10 +9,14 @@ import Blog from './blog.js'
 import { WorkspaceTransformer } from '#transformers/workspace'
 import { WorkspaceCacher } from '#cacher/workspace'
 import cache from '@adonisjs/cache/services/main'
+import { typedObjectEntries } from '@localspace/lib'
+import { flattenPermissions } from '@localspace/node-lib'
 
 export default class Workspace extends BaseModel {
   static selfAssignPrimaryKey = true
   static table = dbRef.workspace.table.name
+
+  // Columns ===========================
 
   @column({ isPrimary: true })
   declare id: string
@@ -26,10 +30,14 @@ export default class Workspace extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
+  // Hooks =============================
+
   @beforeCreate()
   static assignUlid(row: Workspace) {
     row.id = ulid()
   }
+
+  // Relations =========================
 
   @hasMany(() => WorkspaceMember)
   declare members: HasMany<typeof WorkspaceMember>
@@ -46,11 +54,19 @@ export default class Workspace extends BaseModel {
   @hasMany(() => Blog)
   declare blogs: HasMany<typeof Blog>
 
+  // Extra =============================
+
   get transformer() {
     return new WorkspaceTransformer(this)
   }
 
   static get cacher() {
     return new WorkspaceCacher(Workspace, cache.namespace(this.table))
+  }
+
+  get permissions() {
+    return flattenPermissions({
+      permissions: [],
+    })
   }
 }

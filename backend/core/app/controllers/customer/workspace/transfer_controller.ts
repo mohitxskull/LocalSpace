@@ -5,38 +5,45 @@ import db from '@adonisjs/lucid/services/db'
 import { ForbiddenException, NotFoundException } from '@localspace/node-lib/exception'
 import { workspaceMemberRoleE } from '#types/literals'
 import WorkspaceMember from '#models/workspace_member'
+import { ULIDS } from '#validators/index'
+import { dbRef } from '#database/reference'
+import { setting } from '#config/setting'
 
-const input = vine.compile(
+export const input = vine.compile(
   vine.object({
-    newOwnerId: vine.string(),
+    params: vine.object({
+      workspaceId: ULIDS(),
+    }),
+
+    newOwnerId: ULIDS(),
   })
 )
 
-export default class TransferController {
-  async handle({ bouncer, params, request, auth, i18n }: HttpContext) {
+export default class Controller {
+  async handle({ bouncer, request, auth, i18n }: HttpContext) {
     const user = auth.getUserOrFail()
-    const workspace = await Workspace.findOrFail(params.workspaceId)
+    const payload = await request.validateUsing(input)
+    const workspace = await Workspace.findOrFail(payload.params.workspaceId)
 
     await bouncer.with('WorkspacePolicy').authorize('transfer', workspace)
 
-    const { newOwnerId } = await request.validateUsing(input)
-
     const newOwner = await WorkspaceMember.query()
-      .where('workspace_id', workspace.id)
-      .andWhere('user_id', newOwnerId)
+      .where(dbRef.workspaceMember.workspaceId, workspace.id)
+      .andWhere(dbRef.workspaceMember.userId, payload.newOwnerId)
       .first()
 
     if (!newOwner) {
       throw new NotFoundException(i18n.t('customer.workspace.transfer.new_owner_not_found'))
     }
 
-    const ownedWorkspacesCount = await db
-      .from('workspace_members')
-      .where('user_id', newOwnerId)
-      .andWhere('role', workspaceMemberRoleE('owner'))
+    const ownedWorkspacesCount = await user
+      .related('workspaceMember')
+      .query()
+      .andWhere(dbRef.workspaceMember.role, workspaceMemberRoleE('owner'))
       .count('*', 'total')
+      .then((result) => result.pop()!.total)
 
-    if (Number(ownedWorkspacesCount[0].total) >= 5) {
+    if (ownedWorkspacesCount >= setting.customer.workspace.max) {
       throw new ForbiddenException(i18n.t('customer.workspace.transfer.new_owner_max_workspaces'))
     }
 
@@ -44,8 +51,8 @@ export default class TransferController {
 
     try {
       const oldOwner = await WorkspaceMember.query({ client: trx })
-        .where('workspace_id', workspace.id)
-        .andWhere('user_id', user.id)
+        .where(dbRef.workspaceMember.workspaceId, workspace.id)
+        .andWhere(dbRef.workspaceMember.userId, user.id)
         .firstOrFail()
 
       oldOwner.role = workspaceMemberRoleE('member')
@@ -53,9 +60,12 @@ export default class TransferController {
 
       newOwner.useTransaction(trx)
       newOwner.role = workspaceMemberRoleE('owner')
+
       await newOwner.save()
 
       await trx.commit()
+
+      await Workspace.cacher.members({ workspace }).expire()
 
       return {
         message: i18n.t('customer.workspace.transfer.success'),

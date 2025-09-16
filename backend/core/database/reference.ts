@@ -74,7 +74,7 @@ const dbStructure = {
       pivotColumns: ['role', 'joined_at'],
     },
   },
-  permissions: {
+  permission: {
     name: 'permissions',
     columns: {
       id: 'id',

@@ -1,13 +1,13 @@
 import { ResourceSchema } from '@localspace/node-lib'
 
-export const permissionsSchema = {
+export const permissionSchema = {
   workspace: {
     actions: {
-      manage_members: {
+      members: {
         name: 'Manage Members',
         description: 'Allows inviting, removing, and changing member permissions.',
       },
-      manage_billing: {
+      billing: {
         name: 'Manage Billing',
         description:
           "Allows viewing and managing the workspace's subscription and billing information.",

@@ -1,12 +1,24 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Workspace from '#models/workspace'
 import riManager from '#services/ri_service'
-import { permissionsSchema } from '#config/permissions'
+import { permissionSchema } from '#config/permissions'
 import Permission from '#models/permission'
 import User from '#models/user'
+import vine from '@vinejs/vine'
+import { ULIDS } from '#validators/index'
+
+export const input = vine.compile(
+  vine.object({
+    params: vine.object({
+      workspaceId: ULIDS(),
+      memberId: ULIDS(),
+    }),
+  })
+)
 
 export default class ShowController {
-  async handle({ bouncer, params }: HttpContext) {
+  async handle({ bouncer, request }: HttpContext) {
+    const { params } = await request.validateUsing(input)
     const workspace = await Workspace.findOrFail(params.workspaceId)
     await bouncer.with('WorkspacePolicy').authorize('manageMembers', workspace)
 
@@ -19,10 +31,10 @@ export default class ShowController {
     }
 
     // Handle workspace permissions
-    for (const action in permissionsSchema.workspace.actions) {
+    for (const action in permissionSchema.workspace.actions) {
       const actionDef =
-        permissionsSchema.workspace.actions[
-          action as keyof typeof permissionsSchema.workspace.actions
+        permissionSchema.workspace.actions[
+          action as keyof typeof permissionSchema.workspace.actions
         ]
       const ri = riManager.build().workspace(workspace.id).toString()
       const hasPermission = memberPermissions.some(
@@ -38,7 +50,7 @@ export default class ShowController {
 
     // Handle blog permissions
     const blogs = await workspace.related('blogs').query()
-    const blogActions = permissionsSchema.workspace.child.blog.actions
+    const blogActions = permissionSchema.workspace.child.blog.actions
 
     for (const blog of blogs) {
       const blogPermissions: any[] = []
