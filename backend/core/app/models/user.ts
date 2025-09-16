@@ -19,6 +19,8 @@ import cache from '@adonisjs/cache/services/main'
 import { UserCacher } from '../cacher/user.js'
 import Workspace from './workspace.js'
 import WorkspaceMember from './workspace_member.js'
+import Blog from './blog.js'
+import riManager from '#services/ri_service'
 
 export default class User extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -71,6 +73,11 @@ export default class User extends BaseModel {
   @hasMany(() => WorkspaceMember)
   declare workspaceMember: HasMany<typeof WorkspaceMember>
 
+  @hasMany(() => Blog, {
+    foreignKey: dbRef.blog.authorId,
+  })
+  declare blogs: HasMany<typeof Blog>
+
   // Extra =============================
 
   static accessTokens = DbAccessTokensProvider.forModel(User, {
@@ -88,5 +95,15 @@ export default class User extends BaseModel {
 
   static get cacher() {
     return new UserCacher(User, cache.namespace(this.table))
+  }
+
+  async hasPermission(ri: string, action: string): Promise<boolean> {
+    const permissions = await this.related('permissions').query()
+    for (const p of permissions) {
+      if (riManager.matches(p.riPattern, ri) && p.actions.includes(action)) {
+        return true
+      }
+    }
+    return false
   }
 }

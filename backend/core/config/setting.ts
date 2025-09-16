@@ -7,6 +7,10 @@ export const setting = {
     signUp: {
       active: true,
     },
+
+    workspace: {
+      max: 5,
+    },
   },
 
   session: {
@@ -28,9 +32,5 @@ export const setting = {
         path: '/reset-password',
       },
     },
-  },
-
-  document: {
-    max: 100,
   },
 } as const

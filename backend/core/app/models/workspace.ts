@@ -5,6 +5,10 @@ import { ulid } from '#config/ulid'
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import WorkspaceMember from './workspace_member.js'
 import User from './user.js'
+import Blog from './blog.js'
+import { WorkspaceTransformer } from '#transformers/workspace'
+import { WorkspaceCacher } from '#cacher/workspace'
+import cache from '@adonisjs/cache/services/main'
 
 export default class Workspace extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -38,4 +42,15 @@ export default class Workspace extends BaseModel {
     })
   )
   declare users: ManyToMany<typeof User>
+
+  @hasMany(() => Blog)
+  declare blogs: HasMany<typeof Blog>
+
+  get transformer() {
+    return new WorkspaceTransformer(this)
+  }
+
+  static get cacher() {
+    return new WorkspaceCacher(Workspace, cache.namespace(this.table))
+  }
 }

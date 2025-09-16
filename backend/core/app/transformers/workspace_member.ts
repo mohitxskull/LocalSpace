@@ -4,6 +4,7 @@ import { BaseTransformer } from '@localspace/node-lib'
 export class WorkspaceMemberTransformer extends BaseTransformer<WorkspaceMember> {
   async serialize() {
     return {
+      id: this.resource.id,
       userId: this.resource.userId,
       workspaceId: this.resource.workspaceId,
       role: this.resource.role,

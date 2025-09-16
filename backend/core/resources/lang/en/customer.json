@@ -38,5 +38,32 @@
       "email_in_use": "This email address is already in use.",
       "success": "Your email has been updated. A verification link has been sent to your new email address."
     }
+  },
+  "workspace": {
+    "delete": {
+      "success": "Workspace deleted successfully."
+    },
+    "transfer": {
+      "success": "Workspace ownership transferred successfully.",
+      "new_owner_not_found": "The new owner is not a member of this workspace.",
+      "new_owner_max_workspaces": "The new owner has reached the maximum number of workspaces they can own."
+    },
+    "member": {
+      "store": {
+        "success": "Member added successfully.",
+        "user_not_found": "User to add not found.",
+        "no_verified_credential": "The user does not have a verified credential.",
+        "already_member": "User is already a member of this workspace."
+      },
+      "destroy": {
+        "success": "Member removed successfully.",
+        "cannot_remove_self": "You cannot remove yourself from the workspace."
+      }
+    },
+    "permission": {
+      "update": {
+        "success": "Permissions updated successfully."
+      }
+    }
   }
 }

@@ -5,9 +5,13 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Workspace from './workspace.js'
 import { DateTime } from 'luxon'
 import { type WorkspaceMemberRoleT } from '#types/literals'
+import { WorkspaceMemberTransformer } from '#transformers/workspace_member'
 
 export default class WorkspaceMember extends BaseModel {
   static table = dbRef.workspaceMember.table.name
+
+  @column({ isPrimary: true })
+  declare id: number
 
   @column()
   declare userId: string
@@ -18,12 +22,18 @@ export default class WorkspaceMember extends BaseModel {
   @column()
   declare role: WorkspaceMemberRoleT
 
-  @column.dateTime({ autoCreate: true })
-  declare joinedAt: DateTime
+  @column.dateTime()
+  declare joinedAt: DateTime<true> | null
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
 
   @belongsTo(() => Workspace)
   declare workspace: BelongsTo<typeof Workspace>
+
+  get transformer() {
+    return new WorkspaceMemberTransformer(this)
+  }
+
+  declare total: number
 }

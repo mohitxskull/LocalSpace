@@ -61,6 +61,7 @@ const dbStructure = {
   workspaceMember: {
     name: 'workspace_members',
     columns: {
+      id: 'id',
       userId: 'user_id',
       workspaceId: 'workspace_id',
       role: 'role',
@@ -78,10 +79,22 @@ const dbStructure = {
     columns: {
       id: 'id',
       userId: 'user_id',
-      resourceType: 'resource_type',
-      resourceId: 'resource_id',
+      riPattern: 'ri_pattern',
       actions: 'actions',
       grantedAt: 'granted_at',
+    },
+  },
+  blog: {
+    name: 'blogs',
+    columns: {
+      id: 'id',
+      workspaceId: 'workspace_id',
+      authorId: 'author_id',
+      title: 'title',
+      content: 'content',
+      status: 'status',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     },
   },
   token: {

@@ -3,6 +3,7 @@ import { dbRef } from '#database/reference'
 import User from './user.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import { JSONColumn } from '@localspace/node-lib/column/json'
 
 export default class Permission extends BaseModel {
   static table = dbRef.permissions.table.name
@@ -14,13 +15,10 @@ export default class Permission extends BaseModel {
   declare userId: string
 
   @column()
-  declare resourceType: string
+  declare riPattern: string
 
-  @column()
-  declare resourceId: string
-
-  @column()
-  declare actions: string
+  @column(JSONColumn())
+  declare actions: string[]
 
   @column.dateTime({ autoCreate: true })
   declare grantedAt: DateTime<true>

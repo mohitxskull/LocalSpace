@@ -7,6 +7,7 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (t) => {
+      t.increments(dbRef.workspaceMember.id).primary()
       t.string(dbRef.workspaceMember.userId, ULID_LENGTH)
         .notNullable()
         .references(dbRef.user.table.columns('id'))
@@ -18,9 +19,9 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
 
       t.string(dbRef.workspaceMember.role).notNullable()
-      t.timestamp(dbRef.workspaceMember.joinedAt).notNullable()
+      t.timestamp(dbRef.workspaceMember.joinedAt).nullable()
 
-      t.primary([dbRef.workspaceMember.userId, dbRef.workspaceMember.workspaceId])
+      t.unique([dbRef.workspaceMember.userId, dbRef.workspaceMember.workspaceId])
     })
   }
 

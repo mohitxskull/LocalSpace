@@ -10,8 +10,10 @@ import db from '@adonisjs/lucid/services/db'
 import mail from '@adonisjs/mail/services/main'
 import VerifyEmailNotification from '#mails/verify_email_notification'
 import tokenService from '#services/token_service'
-import { tokenTypeE, credentialTypeE, roleE } from '#types/literals'
+import { tokenTypeE, credentialTypeE, roleE, workspaceMemberRoleE } from '#types/literals'
 import limiter from '@adonisjs/limiter/services/main'
+import Workspace from '#models/workspace'
+import WorkspaceMember from '#models/workspace_member'
 
 export const input = vine.compile(
   vine.object({
@@ -68,7 +70,7 @@ export default class Controller {
       )
 
       const credential = await user.related('credentials').create({
-        type: 'email',
+        type: credentialTypeE('email'),
         identifier: payload.email,
         password: payload.password,
       })
@@ -76,6 +78,22 @@ export default class Controller {
       await user.related('customerProfile').create({
         email: payload.email,
       })
+
+      const workspace = await Workspace.create(
+        {
+          name: `${user.name}'s Workspace`,
+        },
+        { client: trx }
+      )
+
+      await WorkspaceMember.create(
+        {
+          userId: user.id,
+          workspaceId: workspace.id,
+          role: workspaceMemberRoleE('owner'),
+        },
+        { client: trx }
+      )
 
       const emailVerificationRequired = setting.credential.email.verification.enabled
 

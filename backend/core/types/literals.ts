@@ -40,3 +40,11 @@ export const workspaceMemberRoleC = ['owner', 'member'] as const
 export type WorkspaceMemberRoleT = (typeof workspaceMemberRoleC)[number]
 
 export const workspaceMemberRoleE = identityOf<WorkspaceMemberRoleT>()
+
+// ===================================
+
+export const blogStatusC = ['draft', 'published', 'archived'] as const
+
+export type BlogStatusT = (typeof blogStatusC)[number]
+
+export const blogStatusE = identityOf<BlogStatusT>()

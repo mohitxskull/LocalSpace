@@ -1,4 +1,3 @@
-import { ULID_LENGTH } from '#config/ulid'
 import { dbRef } from '#database/reference'
 import { BaseSchema } from '@adonisjs/lucid/schema'
 

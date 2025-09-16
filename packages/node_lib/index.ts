@@ -5,3 +5,4 @@ export { type PivotOptions, DBReference, type TableReference } from './src/db_re
 export { BaseTransformer } from './src/base_transformer.js'
 export { ScopedCache } from './src/scoped_cache.js'
 export { BaseCacher } from './src/base_cacher.js'
+export * from './src/ri_manager.js'
