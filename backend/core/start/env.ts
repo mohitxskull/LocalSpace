@@ -29,6 +29,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   CAPTCHA_PRIVATE_KEY: Env.schema.string(),
   CAPTCHA_OFF: Env.schema.boolean.optional(),
 
+  DB_TYPE: Env.schema.enum(['mysql', 'sqlite'] as const),
   DB_HOST: Env.schema.string({ format: 'host' }),
   DB_PORT: Env.schema.number(),
   DB_USER: Env.schema.string(),

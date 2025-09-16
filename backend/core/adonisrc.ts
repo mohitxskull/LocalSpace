@@ -68,6 +68,7 @@ export default defineConfig({
     () => import('@adonisjs/cache/cache_provider'),
     () => import('@adonisjs/i18n/i18n_provider'),
     () => import('@adonisjs/core/providers/edge_provider'),
+    () => import('@adonisjs/transmit/transmit_provider'),
   ],
 
   /*

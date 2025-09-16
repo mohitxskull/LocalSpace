@@ -23,7 +23,7 @@ export const CredentialFactory = factory
     }
   })
   .relation('verification', () => CredentialVerificationFactory)
-  
+
   .build()
 
 export const CustomerProfileFactory = factory
