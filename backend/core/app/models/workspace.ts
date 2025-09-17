@@ -1,16 +1,13 @@
 import { DateTime } from 'luxon'
-import { BaseModel, beforeCreate, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeCreate, column, hasMany } from '@adonisjs/lucid/orm'
 import { dbRef } from '#database/reference'
 import { ulid } from '#config/ulid'
-import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
 import WorkspaceMember from './workspace_member.js'
-import User from './user.js'
 import Blog from './blog.js'
 import { WorkspaceTransformer } from '#transformers/workspace'
 import { WorkspaceCacher } from '#cacher/workspace'
 import cache from '@adonisjs/cache/services/main'
-import { typedObjectEntries } from '@localspace/lib'
-import { flattenPermissions } from '@localspace/node-lib'
 
 export default class Workspace extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -42,15 +39,6 @@ export default class Workspace extends BaseModel {
   @hasMany(() => WorkspaceMember)
   declare members: HasMany<typeof WorkspaceMember>
 
-  @manyToMany(
-    () => User,
-    dbRef.workspaceMember.table.pivot({
-      pivotForeignKey: dbRef.workspaceMember.workspaceId,
-      pivotRelatedForeignKey: dbRef.workspaceMember.userId,
-    })
-  )
-  declare users: ManyToMany<typeof User>
-
   @hasMany(() => Blog)
   declare blogs: HasMany<typeof Blog>
 
@@ -62,11 +50,5 @@ export default class Workspace extends BaseModel {
 
   static get cacher() {
     return new WorkspaceCacher(Workspace, cache.namespace(this.table))
-  }
-
-  get permissions() {
-    return flattenPermissions({
-      permissions: [],
-    })
   }
 }

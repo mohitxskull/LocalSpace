@@ -3,14 +3,13 @@ import vine from '@vinejs/vine'
 import type { HttpContext } from '@adonisjs/core/http'
 import { CustomerEMailS, CustomerNameS, CustomerPasswordS } from '#validators/customer'
 import { setting } from '#config/setting'
-import Credential from '#models/credential'
 import { dbRef } from '#database/reference'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import mail from '@adonisjs/mail/services/main'
 import VerifyEmailNotification from '#mails/verify_email_notification'
 import tokenService from '#services/token_service'
-import { tokenTypeE, credentialTypeE, roleE, workspaceMemberRoleE } from '#types/literals'
+import { tokenTypeE, roleE, workspaceMemberRoleE } from '#types/literals'
 import limiter from '@adonisjs/limiter/services/main'
 import Workspace from '#models/workspace'
 import WorkspaceMember from '#models/workspace_member'
@@ -42,17 +41,16 @@ export default class Controller {
     const trx = await db.transaction()
 
     try {
-      const credentialExist = await Credential.findBy(
+      const userExists = await User.findBy(
         {
-          [dbRef.credential.identifierC]: payload.email,
-          [dbRef.credential.typeC]: credentialTypeE('email'),
+          [dbRef.user.email]: payload.email,
         },
         {
           client: trx,
         }
       )
 
-      if (credentialExist) {
+      if (userExists) {
         throw new BadRequestException(ctx.i18n.t('customer.auth.sign_up.email_exists'), {
           source: 'email',
           reason: 'Email already exists',
@@ -62,22 +60,14 @@ export default class Controller {
       const user = await User.create(
         {
           name: payload.name,
+          email: payload.email,
+          password: payload.password,
           role: roleE('customer'),
         },
         {
           client: trx,
         }
       )
-
-      const credential = await user.related('credentials').create({
-        type: credentialTypeE('email'),
-        identifier: payload.email,
-        password: payload.password,
-      })
-
-      await user.related('customerProfile').create({
-        email: payload.email,
-      })
 
       const workspace = await Workspace.create(
         {
@@ -109,7 +99,7 @@ export default class Controller {
           }
         )
 
-        await mail.sendLater(new VerifyEmailNotification({ user, credential, accessTokenHolder }))
+        await mail.sendLater(new VerifyEmailNotification({ user, accessTokenHolder }))
       }
 
       await trx.commit()

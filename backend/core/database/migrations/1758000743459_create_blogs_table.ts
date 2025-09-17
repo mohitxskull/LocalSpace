@@ -9,14 +9,17 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (t) => {
       t.string(dbRef.blog.id, ULID_LENGTH).primary().unique().notNullable()
+
       t.string(dbRef.blog.workspaceId, ULID_LENGTH)
         .notNullable()
         .references(dbRef.workspace.table.columns('id'))
         .onDelete('CASCADE')
+
       t.string(dbRef.blog.authorId, ULID_LENGTH)
         .nullable()
-        .references(dbRef.user.table.columns('id'))
-        .onDelete('SET NULL')
+        .references(dbRef.workspaceMember.table.columns('id'))
+        .onDelete('CASCADE')
+
       t.string(dbRef.blog.title).notNullable()
       t.text(dbRef.blog.content).notNullable()
       t.string(dbRef.blog.status).notNullable().defaultTo(blogStatusE('draft'))

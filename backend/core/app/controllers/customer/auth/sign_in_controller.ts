@@ -3,15 +3,13 @@ import vine from '@vinejs/vine'
 import type { HttpContext } from '@adonisjs/core/http'
 import { CustomerEMailS, CustomerPasswordS } from '#validators/customer'
 import { setting } from '#config/setting'
-import Credential from '#models/credential'
+import User from '#models/user'
 import { dbRef } from '#database/reference'
 import hash from '@adonisjs/core/services/hash'
 import db from '@adonisjs/lucid/services/db'
-import { DateTime } from 'luxon'
 import Token from '#models/token'
-import { tokenTypeE, credentialTypeE } from '#types/literals'
+import { tokenTypeE } from '#types/literals'
 import limiter from '@adonisjs/limiter/services/main'
-import CredentialVerification from '#models/credential_verification'
 import tokenService from '#services/token_service'
 
 export const input = vine.compile(
@@ -39,17 +37,9 @@ export default class Controller {
     const trx = await db.transaction()
 
     try {
-      const credential = await Credential.findBy(
-        {
-          [dbRef.credential.identifierC]: payload.email,
-          [dbRef.credential.typeC]: credentialTypeE('email'),
-        },
-        {
-          client: trx,
-        }
-      )
+      const user = await User.query({ client: trx }).where(dbRef.user.email, payload.email).first()
 
-      if (!credential) {
+      if (!user) {
         await hash.make(payload.password)
 
         throw new BadRequestException(ctx.i18n.t('customer.auth.sign_in.invalid_credentials'), {
@@ -58,41 +48,32 @@ export default class Controller {
         })
       }
 
-      const credentialPassword = credential.getPasswordOrFail()
+      if (!user.password) {
+        throw new BadRequestException(ctx.i18n.t('customer.auth.sign_in.invalid_credentials'), {
+          source: 'email',
+          reason: 'Password not set',
+        })
+      }
 
-      if (!(await hash.verify(credentialPassword, payload.password))) {
+      if (!(await hash.verify(user.password, payload.password))) {
         throw new BadRequestException(ctx.i18n.t('customer.auth.sign_in.invalid_credentials'), {
           source: 'email',
           reason: 'Password is incorrect',
         })
       }
 
-      await credential.load('user')
-
-      const user = credential.user
-
       const emailVerificationRequired = setting.credential.email.verification.enabled
 
-      if (emailVerificationRequired) {
-        const credentialVerification = await CredentialVerification.find(credential.id, {
-          client: trx,
-        })
-
-        if (!credentialVerification || !credentialVerification.verifiedAt) {
-          throw new BadRequestException(
-            ctx.i18n.t('customer.auth.sign_in.email_verification_required'),
-            {
-              code: 'EMAIL_NOT_VERIFIED',
-              source: 'email',
-              reason: 'Email verification is required',
-            }
-          )
-        }
+      if (emailVerificationRequired && !user.verifiedAt) {
+        throw new BadRequestException(
+          ctx.i18n.t('customer.auth.sign_in.email_verification_required'),
+          {
+            code: 'EMAIL_NOT_VERIFIED',
+            source: 'email',
+            reason: 'Email verification is required',
+          }
+        )
       }
-
-      credential.usedAt = DateTime.now()
-
-      await credential.save()
 
       const existingAccessTokens = await Token.query({ client: trx }).where({
         [dbRef.token.tokenableId]: user.id,

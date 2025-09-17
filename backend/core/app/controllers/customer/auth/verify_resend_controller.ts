@@ -1,6 +1,6 @@
 import { dbRef } from '#database/reference'
-import Credential from '#models/credential'
-import { credentialTypeE, tokenTypeE } from '#types/literals'
+import User from '#models/user'
+import { tokenTypeE } from '#types/literals'
 import { CustomerEMailS } from '#validators/customer'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -19,20 +19,16 @@ export default class Controller {
   async handle(ctx: HttpContext) {
     const payload = await ctx.request.validateUsing(input)
 
-    const credential = await Credential.query()
-      .where(dbRef.credential.identifierC, payload.email)
-      .andWhere(dbRef.credential.typeC, credentialTypeE('email'))
-      .andWhereHas('verification', (q) => {
-        q.whereNotNull(dbRef.credentialVerification.verifiedAt)
-      })
-      .preload('user')
+    const user = await User.query()
+      .where(dbRef.user.email, payload.email)
+      .whereNull(dbRef.user.verifiedAt)
       .first()
 
-    if (credential) {
+    if (user) {
       const accessTokenHolder = await tokenService.create(
         {
           type: tokenTypeE('email_verification'),
-          user: credential.user,
+          user: user,
           expiresIn: setting.credential.email.verification.expiresIn,
         },
         {
@@ -42,8 +38,7 @@ export default class Controller {
 
       await mail.sendLater(
         new VerifyEmailNotification({
-          user: credential.user,
-          credential,
+          user: user,
           accessTokenHolder,
         })
       )

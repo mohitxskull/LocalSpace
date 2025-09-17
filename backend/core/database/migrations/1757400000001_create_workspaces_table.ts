@@ -8,6 +8,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (t) => {
       t.string(dbRef.workspace.id, ULID_LENGTH).primary().unique().notNullable()
+
       t.string(dbRef.workspace.name).notNullable()
 
       t.timestamp(dbRef.workspace.createdAt).notNullable()

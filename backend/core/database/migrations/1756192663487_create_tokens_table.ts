@@ -8,6 +8,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (t) => {
       t.increments(dbRef.token.id)
+
       t.string(dbRef.token.tokenableId, ULID_LENGTH)
         .notNullable()
         .references(dbRef.user.table.columns('id'))

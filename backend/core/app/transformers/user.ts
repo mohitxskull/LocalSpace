@@ -6,17 +6,9 @@ export class UserTransformer extends BaseTransformer<User> {
     return {
       id: this.resource.id,
       name: this.resource.name,
+      email: this.resource.email,
       createdAt: this.datetime(this.resource.createdAt),
       updatedAt: this.datetime(this.resource.updatedAt),
-    }
-  }
-
-  async customerProfile() {
-    const [row] = await Promise.all([this.serialize(), this.resource.load('customerProfile')])
-
-    return {
-      ...row,
-      customerProfile: await this.resource.customerProfile.transformer.serialize(),
     }
   }
 

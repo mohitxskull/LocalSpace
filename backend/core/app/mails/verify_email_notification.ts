@@ -1,5 +1,4 @@
 import { setting } from '#config/setting'
-import Credential from '#models/credential'
 import User from '#models/user'
 import env from '#start/env'
 import router from '@adonisjs/core/services/router'
@@ -12,17 +11,10 @@ export default class VerifyEmailNotification extends BaseMail {
   constructor(
     private params: {
       user: User
-      credential: Credential
       accessTokenHolder: AccessTokenHolder
     }
   ) {
     super()
-
-    if (this.params.credential.type !== 'email') {
-      throw new Error('Invalid credential type', {
-        cause: this.params.credential.toJSON(),
-      })
-    }
   }
 
   /**
@@ -31,7 +23,7 @@ export default class VerifyEmailNotification extends BaseMail {
    */
   prepare() {
     const userName = this.params.user.name
-    const email = this.params.credential.identifier
+    const email = this.params.user.email
 
     const url = router
       .builder()

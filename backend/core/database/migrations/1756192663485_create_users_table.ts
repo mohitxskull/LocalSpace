@@ -10,6 +10,10 @@ export default class extends BaseSchema {
       t.string(dbRef.user.id, ULID_LENGTH).primary().unique().notNullable()
       t.string(dbRef.user.name).nullable()
       t.string(dbRef.user.role).notNullable()
+      t.string(dbRef.user.email).notNullable().unique()
+      t.string(dbRef.user.password).notNullable()
+
+      t.timestamp(dbRef.user.verifiedAt).nullable()
 
       t.timestamp(dbRef.user.createdAt).notNullable()
       t.timestamp(dbRef.user.updatedAt).notNullable()

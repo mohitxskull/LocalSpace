@@ -1,6 +1,6 @@
 import { dbRef } from '#database/reference'
-import Credential from '#models/credential'
-import { credentialTypeE, tokenTypeE } from '#types/literals'
+import User from '#models/user'
+import { tokenTypeE } from '#types/literals'
 import { CustomerEMailS } from '#validators/customer'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
@@ -19,17 +19,13 @@ export default class Controller {
   async handle(ctx: HttpContext) {
     const payload = await ctx.request.validateUsing(input)
 
-    const credential = await Credential.query()
-      .where(dbRef.credential.identifierC, payload.email)
-      .andWhere(dbRef.credential.typeC, credentialTypeE('email'))
-      .preload('user')
-      .first()
+    const user = await User.query().where(dbRef.user.email, payload.email).first()
 
-    if (credential) {
+    if (user) {
       const accessTokenHolder = await tokenService.create(
         {
           type: tokenTypeE('password_reset'),
-          user: credential.user,
+          user: user,
           expiresIn: setting.credential.email.passwordReset.expiresIn,
         },
         {
@@ -39,8 +35,7 @@ export default class Controller {
 
       await mail.sendLater(
         new PasswordResetNotification({
-          user: credential.user,
-          credential,
+          user: user,
           accessTokenHolder,
         })
       )

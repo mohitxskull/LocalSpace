@@ -4,13 +4,15 @@ import { dbRef } from '#database/reference'
 import { ulid } from '#config/ulid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Workspace from './workspace.js'
-import User from './user.js'
 import { type BlogStatusT } from '#types/literals'
 import { BlogTransformer } from '#transformers/blog'
+import WorkspaceMember from './workspace_member.js'
 
 export default class Blog extends BaseModel {
   static selfAssignPrimaryKey = true
   static table = dbRef.blog.table.name
+
+  // Columns ===========================
 
   @column({ isPrimary: true })
   declare id: string
@@ -31,23 +33,29 @@ export default class Blog extends BaseModel {
   declare status: BlogStatusT
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime<true>
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime<true>
+
+  // Hooks =============================
 
   @beforeCreate()
   static assignUlid(row: Blog) {
     row.id = ulid()
   }
 
+  // Relations =========================
+
   @belongsTo(() => Workspace)
   declare workspace: BelongsTo<typeof Workspace>
 
-  @belongsTo(() => User, {
+  @belongsTo(() => WorkspaceMember, {
     foreignKey: dbRef.blog.authorId,
   })
-  declare author: BelongsTo<typeof User>
+  declare author: BelongsTo<typeof WorkspaceMember>
+
+  // Extra =============================
 
   get transformer() {
     return new BlogTransformer(this)

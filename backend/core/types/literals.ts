@@ -45,7 +45,7 @@ export const roleE = identityOf<RoleT>()
 
 // ===================================
 
-export const workspaceMemberRoleC = ['owner', 'member'] as const
+export const workspaceMemberRoleC = ['owner', 'member', 'manager', 'viewer'] as const
 
 export type WorkspaceMemberRoleT = (typeof workspaceMemberRoleC)[number]
 

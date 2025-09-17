@@ -1,5 +1,3 @@
-import { dbRef } from '#database/reference'
-import Credential from '#models/credential'
 import { tokenTypeE } from '#types/literals'
 import { CustomerPasswordS } from '#validators/customer'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -7,6 +5,7 @@ import tokenService from '#services/token_service'
 import vine from '@vinejs/vine'
 import { ForbiddenException } from '@localspace/node-lib/exception'
 import db from '@adonisjs/lucid/services/db'
+import User from '#models/user'
 
 export const input = vine.compile(
   vine.object({
@@ -36,21 +35,17 @@ export default class Controller {
         throw new ForbiddenException(ctx.i18n.t('customer.auth.password.reset.invalid_token'))
       }
 
-      const credential = await Credential.findBy(
-        {
-          [dbRef.credential.userIdC]: accessTokenHolder.tokenableId,
-        },
-        {
-          client: trx,
-        }
-      )
+      const user = await User.find(accessTokenHolder.tokenableId, {
+        client: trx,
+      })
 
-      if (!credential) {
+      if (!user) {
         throw new ForbiddenException(ctx.i18n.t('customer.auth.password.reset.invalid_token'))
       }
 
-      credential.password = payload.newPassword
-      await credential.save()
+      user.password = payload.newPassword
+
+      await user.save()
 
       await accessTokenHolder.delete({ client: trx })
 

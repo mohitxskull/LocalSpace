@@ -7,46 +7,11 @@ const dbStructure = {
       id: 'id',
       name: 'name',
       role: 'role',
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    },
-  },
-  credential: {
-    name: 'credentials',
-    columns: {
-      id: 'id',
-      userId: 'user_id',
-      type: 'type',
-      identifier: 'identifier',
+      email: 'email',
       password: 'password',
-      usedAt: 'used_at',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-    },
-  },
-  credentialVerification: {
-    name: 'credential_verifications',
-    columns: {
-      credentialId: 'credential_id',
       verifiedAt: 'verified_at',
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    },
-  },
-  customerProfile: {
-    name: 'customer_profiles',
-    columns: {
-      userId: 'user_id',
-      email: 'email',
-      updatedAt: 'updated_at',
-    },
-  },
-  adminProfile: {
-    name: 'admin_profiles',
-    columns: {
-      userId: 'user_id',
-      email: 'email',
-      updatedAt: 'updated_at',
     },
   },
   workspace: {
@@ -65,23 +30,11 @@ const dbStructure = {
       userId: 'user_id',
       workspaceId: 'workspace_id',
       role: 'role',
+      invitedAt: 'invited_at',
       joinedAt: 'joined_at',
-    },
-    pivot: {
-      pivotTable: 'workspace_members',
-      pivotForeignKey: 'user_id',
-      pivotRelatedForeignKey: 'workspace_id',
-      pivotColumns: ['role', 'joined_at'],
-    },
-  },
-  permission: {
-    name: 'permissions',
-    columns: {
-      id: 'id',
-      userId: 'user_id',
-      riPattern: 'ri_pattern',
-      actions: 'actions',
-      grantedAt: 'granted_at',
+      leftAt: 'left_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     },
   },
   blog: {
@@ -89,7 +42,7 @@ const dbStructure = {
     columns: {
       id: 'id',
       workspaceId: 'workspace_id',
-      authorId: 'author_id',
+      authorId: 'author_id', // Workspace Member ID
       title: 'title',
       content: 'content',
       status: 'status',
