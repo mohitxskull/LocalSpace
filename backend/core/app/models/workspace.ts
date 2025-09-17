@@ -9,8 +9,10 @@ import Blog from './blog.js'
 import { WorkspaceTransformer } from '#transformers/workspace'
 import { WorkspaceCacher } from '#cacher/workspace'
 import cache from '@adonisjs/cache/services/main'
-import { typedObjectEntries } from '@localspace/lib'
 import { flattenPermissions } from '@localspace/node-lib'
+import riManager from '#services/ri_service'
+import { permissionSchema } from '#config/permissions'
+import { workspaceMemberRoleE } from '#types/literals'
 
 export default class Workspace extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -64,9 +66,34 @@ export default class Workspace extends BaseModel {
     return new WorkspaceCacher(Workspace, cache.namespace(this.table))
   }
 
+  async isOwner(params: { user: User }) {
+    const members = await Workspace.cacher.members({ workspace: this }).get()
+
+    const member = members.find((m) => m.userId === params.user.id)
+
+    if (!member) return false
+
+    return member.role === workspaceMemberRoleE('owner')
+  }
+
+  async isMember(params: { user: User }) {
+    const members = await Workspace.cacher.members({ workspace: this }).get()
+
+    return members.find((m) => m.userId === params.user.id)
+  }
+
   get permissions() {
     return flattenPermissions({
-      permissions: [],
+      permissions: [
+        {
+          riPattern: riManager.build().workspace(this.id).toString(),
+          actions: permissionSchema.workspace.actions,
+        },
+        {
+          riPattern: riManager.build().workspace(this.id).blog('*').toString(),
+          actions: permissionSchema.workspace.child.blog.actions,
+        },
+      ],
     })
   }
 }

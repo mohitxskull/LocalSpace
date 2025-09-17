@@ -1,8 +1,10 @@
-import { typedObjectEntries } from '@localspace/lib'
+import { base64 } from '@adonisjs/core/helpers'
+import stringHelpers from '@adonisjs/core/helpers/string'
+import { hash, typedObjectEntries } from '@localspace/lib'
 
 /** A group of permissions for a specific resource identifier (ri). */
 type PermissionGroup = {
-  ri: string
+  riPattern: string
   actions: Record<string, Record<string, string>> // e.g., { create: { description: '...' } }
 }
 
@@ -27,8 +29,8 @@ export const flattenPermissions = (params: {
 }): FlattenedPermission[] => {
   return params.permissions.flatMap((permissionGroup) =>
     typedObjectEntries(permissionGroup.actions).map(([action, details]) => ({
-      id: `${permissionGroup.ri}-${action}`,
-      ri: permissionGroup.ri,
+      id: base64.urlEncode(`${permissionGroup.riPattern}-${action}`),
+      ri: permissionGroup.riPattern,
       action: action,
       ...details,
     }))

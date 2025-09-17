@@ -19,7 +19,9 @@ export const input = vine.compile(
 export default class ShowController {
   async handle({ bouncer, request }: HttpContext) {
     const { params } = await request.validateUsing(input)
+
     const workspace = await Workspace.findOrFail(params.workspaceId)
+
     await bouncer.with('WorkspacePolicy').authorize('manageMembers', workspace)
 
     const member = await User.findOrFail(params.memberId)

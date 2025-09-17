@@ -1,17 +1,11 @@
 import User from '#models/user'
 import Workspace from '#models/workspace'
-import { workspaceMemberRoleE } from '#types/literals'
+import riManager from '#services/ri_service'
 import { AuthorizerResponse } from '@adonisjs/bouncer/types'
 
 export default class WorkspacePolicy {
-  private async isOwner(user: User, workspace: Workspace): Promise<boolean> {
-    const members = await Workspace.cacher.members({ workspace }).get()
-
-    const member = members.find((m) => m.userId === user.id)
-
-    if (!member) return false
-
-    return member.role === workspaceMemberRoleE('owner')
+  #riPattern(params: { workspace: Workspace }) {
+    return riManager.build().workspace(params.workspace.id).toString()
   }
 
   async view(user: User, workspace: Workspace): Promise<AuthorizerResponse> {
@@ -20,18 +14,29 @@ export default class WorkspacePolicy {
   }
 
   async update(user: User, workspace: Workspace): Promise<AuthorizerResponse> {
-    return this.isOwner(user, workspace)
+    return await workspace.isOwner({ user })
   }
 
   async delete(user: User, workspace: Workspace): Promise<AuthorizerResponse> {
-    return this.isOwner(user, workspace)
+    return await workspace.isOwner({ user })
   }
 
   async transfer(user: User, workspace: Workspace): Promise<AuthorizerResponse> {
-    return this.isOwner(user, workspace)
+    return await workspace.isOwner({ user })
   }
 
-  async manageMembers(user: User, workspace: Workspace): Promise<AuthorizerResponse> {
-    return this.isOwner(user, workspace)
+  async member(user: User, workspace: Workspace): Promise<AuthorizerResponse> {
+    const isOwner = await workspace.isOwner({ user })
+
+    if (isOwner) {
+      return true
+    }
+
+    const hasPermission = await user.hasPermission({
+      riPattern: this.#riPattern({ workspace }),
+      actions: ['member'],
+    })
+
+    return hasPermission
   }
 }
