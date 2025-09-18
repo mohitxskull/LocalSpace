@@ -5,6 +5,7 @@ import vine from '@vinejs/vine'
 import { ULIDS } from '#validators/index'
 import { setting } from '#config/setting'
 import { ForbiddenException } from '@localspace/node-lib/exception'
+import { blogStatusE } from '#types/literals'
 
 export const validator = vine.compile(
   vine.object({
@@ -25,11 +26,11 @@ export default class Controller {
 
     await ctx.bouncer.with('BlogPolicy').authorize('create', workspace)
 
-    const blogCount = await workspace.related('blogs').query().count('*', 'total').first()
+    const blogCount = await workspace.helper.getBlogCount()
 
     console.log('Blog Count: ', blogCount)
 
-    if (blogCount && blogCount.total >= setting.customer.workspace.blog.max) {
+    if (blogCount >= setting.customer.workspace.blog.max) {
       throw new ForbiddenException(
         'You have reached the maximum number of blogs for this workspace.'
       )
@@ -41,6 +42,7 @@ export default class Controller {
       title: payload.title,
       content: payload.content,
       authorId: member.id,
+      status: blogStatusE('draft'),
     })
 
     return {

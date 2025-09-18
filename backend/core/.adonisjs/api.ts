@@ -85,6 +85,211 @@ type ApiV1CustomerAuthPasswordResetPost = {
     true
   >
 }
+type ApiV1CustomerWorkspacePost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/create_controller.ts'))['input']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/create_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceGetHead = {
+  request: MakeTuyauRequest<
+    InferInput<(typeof import('../app/controllers/customer/workspace/list_controller.ts'))['input']>
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/list_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdGetHead = {
+  request: MakeTuyauRequest<
+    InferInput<(typeof import('../app/controllers/customer/workspace/show_controller.ts'))['input']>
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/show_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdPut = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/update_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/update_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdDelete = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/delete_controller.ts'))['input']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/delete_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdTransferPost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/transfer_controller.ts'))['input']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/transfer_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdMemberPost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/member/create_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/member/create_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdMemberIdPut = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/member/update_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/member/update_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdMemberIdDelete = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/member/delete_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/member/delete_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdProfileGetHead = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/profile/show_controller.ts'))['input']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/profile/show_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdProfileLeavePost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/profile/leave_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/profile/leave_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogPost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/create_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/create_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogGetHead = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/list_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/list_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogIdGetHead = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/show_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/show_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogIdPut = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/update_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/update_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogIdDelete = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/delete_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/delete_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogIdPublishPost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/publish_controller.ts'))['input']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/publish_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogIdUnpublishPost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/unpublish_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/unpublish_controller.ts').default['handle'],
+    true
+  >
+}
+type ApiV1CustomerWorkspaceIdBlogIdArchivePost = {
+  request: MakeTuyauRequest<
+    InferInput<
+      (typeof import('../app/controllers/customer/workspace/blog/archive_controller.ts'))['validator']
+    >
+  >
+  response: MakeTuyauResponse<
+    import('../app/controllers/customer/workspace/blog/archive_controller.ts').default['handle'],
+    true
+  >
+}
 type ApiV1PingGetHead = {
   request: MakeTuyauRequest<
     InferInput<(typeof import('../app/controllers/ping_controller.ts'))['input']>
@@ -132,6 +337,66 @@ export interface ApiDefinition {
             reset: {
               $url: {}
               $post: ApiV1CustomerAuthPasswordResetPost
+            }
+          }
+        }
+        workspace: {
+          '$url': {}
+          '$post': ApiV1CustomerWorkspacePost
+          '$get': ApiV1CustomerWorkspaceGetHead
+          '$head': ApiV1CustomerWorkspaceGetHead
+          ':workspaceId': {
+            $url: {}
+            $get: ApiV1CustomerWorkspaceIdGetHead
+            $head: ApiV1CustomerWorkspaceIdGetHead
+            $put: ApiV1CustomerWorkspaceIdPut
+            $delete: ApiV1CustomerWorkspaceIdDelete
+            transfer: {
+              $url: {}
+              $post: ApiV1CustomerWorkspaceIdTransferPost
+            }
+            member: {
+              '$url': {}
+              '$post': ApiV1CustomerWorkspaceIdMemberPost
+              ':memberId': {
+                $url: {}
+                $put: ApiV1CustomerWorkspaceIdMemberIdPut
+                $delete: ApiV1CustomerWorkspaceIdMemberIdDelete
+              }
+            }
+            profile: {
+              $url: {}
+              $get: ApiV1CustomerWorkspaceIdProfileGetHead
+              $head: ApiV1CustomerWorkspaceIdProfileGetHead
+              leave: {
+                $url: {}
+                $post: ApiV1CustomerWorkspaceIdProfileLeavePost
+              }
+            }
+            blog: {
+              '$url': {}
+              '$post': ApiV1CustomerWorkspaceIdBlogPost
+              '$get': ApiV1CustomerWorkspaceIdBlogGetHead
+              '$head': ApiV1CustomerWorkspaceIdBlogGetHead
+              ':blogId': {
+                $url: {}
+                $get: ApiV1CustomerWorkspaceIdBlogIdGetHead
+                $head: ApiV1CustomerWorkspaceIdBlogIdGetHead
+                $put: ApiV1CustomerWorkspaceIdBlogIdPut
+                $delete: ApiV1CustomerWorkspaceIdBlogIdDelete
+                publish: {
+                  $url: {}
+                  $post: ApiV1CustomerWorkspaceIdBlogIdPublishPost
+                }
+                unpublish: {
+                  $url: {}
+                  $post: ApiV1CustomerWorkspaceIdBlogIdUnpublishPost
+                }
+                archive: {
+                  $url: {}
+                  $post: ApiV1CustomerWorkspaceIdBlogIdArchivePost
+                }
+              }
             }
           }
         }

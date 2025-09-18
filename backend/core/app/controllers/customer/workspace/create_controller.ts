@@ -6,6 +6,7 @@ import db from '@adonisjs/lucid/services/db'
 import { ForbiddenException } from '@localspace/node-lib/exception'
 import { setting } from '#config/setting'
 import { WorkspaceNameS } from '#validators/workspace'
+import { DateTime } from 'luxon'
 
 export const input = vine.compile(
   vine.object({
@@ -40,6 +41,7 @@ export default class Controller {
       await workspace.related('members').create({
         userId: user.id,
         role: workspaceMemberRoleE('owner'),
+        joinedAt: DateTime.now(),
       })
 
       await trx.commit()

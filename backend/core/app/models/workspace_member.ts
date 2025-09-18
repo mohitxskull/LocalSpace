@@ -55,7 +55,7 @@ export default class WorkspaceMember extends BaseModel {
 
   // Extra =============================
 
-  declare total: number
+  declare $extras: { total: number }
 
   get transformer() {
     return new WorkspaceMemberTransformer(this)

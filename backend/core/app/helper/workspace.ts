@@ -18,6 +18,14 @@ export class WorkspaceHelper extends BaseHelper<Workspace> {
       .query()
       .where(dbRef.blog.status, blogStatusE('published'))
       .count('*', 'total')
-      .then((result) => result.pop()?.total || 0)
+      .then((result) => result.pop()?.$extras.total || 0)
+  }
+
+  async getBlogCount(): Promise<number> {
+    return await this.resource
+      .related('blogs')
+      .query()
+      .count('*', 'total')
+      .then((result) => result.pop()?.$extras.total || 0)
   }
 }

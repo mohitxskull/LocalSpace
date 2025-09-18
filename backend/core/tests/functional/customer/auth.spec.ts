@@ -2,16 +2,18 @@ import { test } from '@japa/runner'
 import { UserFactory } from '#database/factories/user_factory'
 import mail from '@adonisjs/mail/services/main'
 import { dbRef } from '#database/reference'
-import Credential from '#models/credential'
 import VerifyEmailNotification from '#mails/verify_email_notification'
 import tokenService from '#services/token_service'
 import { tokenTypeE } from '#types/literals'
-import CredentialVerification from '#models/credential_verification'
 import Token from '#models/token'
+import User from '#models/user'
+import { DateTime } from 'luxon'
+import testUtils from '@adonisjs/core/services/test_utils'
+import Workspace from '#models/workspace'
 
 test.group('Customer auth', (group) => {
   group.each.setup(async () => {
-    await UserFactory.create()
+    await testUtils.db().truncate()
   })
 
   group.each.teardown(() => {
@@ -34,8 +36,7 @@ test.group('Customer auth', (group) => {
 
     response.assertStatus(200)
     response.assertBodyContains({
-      message:
-        'A confirmation link has been sent to your email. Please check your inbox to complete your registration.',
+      message: 'Your account has been created. Please check your email to verify your account.',
       meta: {
         email: {
           verificationRequired: true,
@@ -43,10 +44,19 @@ test.group('Customer auth', (group) => {
       },
     })
 
-    const credential = await Credential.query()
-      .where(dbRef.credential.identifierC, userEmail)
+    const user = await User.query().where(dbRef.user.email, userEmail).first()
+    assert.exists(user)
+
+    const workspace = await Workspace.query().where('name', `${user!.name}'s Workspace`).first()
+    assert.exists(workspace)
+
+    const workspaceMember = await workspace!
+      .related('members')
+      .query()
+      .where('user_id', user!.id)
       .first()
-    assert.exists(credential)
+    assert.exists(workspaceMember)
+    assert.equal(workspaceMember!.role, 'owner')
 
     mails.assertQueued(VerifyEmailNotification, (email) => {
       email.message.assertTo(userEmail)
@@ -58,9 +68,7 @@ test.group('Customer auth', (group) => {
   test('should return error if email already exists', async ({ client }) => {
     const userEmail = 'test2@gmail.com'
 
-    await UserFactory.with('credentials', 1, (cred) =>
-      cred.merge({ identifier: userEmail })
-    ).create()
+    await UserFactory.merge({ email: userEmail }).create()
 
     const response = await client.post('/api/v1/customer/auth/sign-up').json({
       name: 'test',
@@ -71,8 +79,7 @@ test.group('Customer auth', (group) => {
 
     response.assertStatus(400)
     response.assertBodyContains({
-      code: 'E_BAD_REQUEST',
-      message: 'Email already exists.',
+      message: 'An account with this email address already exists.',
       source: 'email',
     })
   })
@@ -81,9 +88,11 @@ test.group('Customer auth', (group) => {
     const password = 'password'
     const userEmail = 'verified@gmail.com'
 
-    await UserFactory.with('credentials', 1, (cred) =>
-      cred.merge({ identifier: userEmail, password }).with('verification', 1)
-    ).create()
+    await UserFactory.merge({
+      email: userEmail,
+      password: password,
+      verifiedAt: DateTime.now(),
+    }).create()
 
     const response = await client.post('/api/v1/customer/auth/sign-in').json({
       email: userEmail,
@@ -97,16 +106,18 @@ test.group('Customer auth', (group) => {
     assert.equal(body.token.type, 'bearer')
     assert.isString(body.token.value)
     assert.isString(body.token.expiresAt)
-    assert.equal(body.message, 'You have successfully signed in!')
+    assert.equal(body.message, 'You have been signed in successfully.')
   })
 
   test('should not sign in a user with incorrect credentials', async ({ client }) => {
     const password = 'password'
     const userEmail = 'verified2@gmail.com'
 
-    await UserFactory.with('credentials', 1, (cred) =>
-      cred.merge({ identifier: userEmail, password }).with('verification', 1)
-    ).create()
+    await UserFactory.merge({
+      email: userEmail,
+      password: password,
+      verifiedAt: DateTime.now(),
+    }).create()
 
     const response = await client.post('/api/v1/customer/auth/sign-in').json({
       email: userEmail,
@@ -115,8 +126,7 @@ test.group('Customer auth', (group) => {
 
     response.assertStatus(400)
     response.assertBodyContains({
-      code: 'E_BAD_REQUEST',
-      message: 'Invalid credentials',
+      message: 'Invalid email or password.',
       source: 'email',
     })
   })
@@ -125,9 +135,7 @@ test.group('Customer auth', (group) => {
     const password = 'password'
     const userEmail = 'unverified@gmail.com'
 
-    await UserFactory.with('credentials', 1, (cred) =>
-      cred.merge({ identifier: userEmail, password })
-    ).create()
+    await UserFactory.merge({ email: userEmail, password: password }).create()
 
     const response = await client.post('/api/v1/customer/auth/sign-in').json({
       email: userEmail,
@@ -138,14 +146,13 @@ test.group('Customer auth', (group) => {
     response.assertBodyContains({
       code: 'EMAIL_NOT_VERIFIED',
       message:
-        'A confirmation link has been sent to your email. Please check your inbox to verify your email and complete your registration.',
+        'Your email address is not verified. Please check your inbox for a verification link.',
       source: 'email',
     })
   })
 
   test('should verify user email with a valid token', async ({ client, assert }) => {
-    const user = await UserFactory.with('credentials', 1).create()
-    const credential = user.credentials[0]
+    const user = await UserFactory.create()
 
     const verificationToken = await tokenService.create({
       user,
@@ -159,12 +166,11 @@ test.group('Customer auth', (group) => {
 
     response.assertStatus(200)
     response.assertBodyContains({
-      message: 'Email verified successfully!',
+      message: 'Your email address has been verified successfully.',
     })
 
-    const credentialVerification = await CredentialVerification.find(credential.id)
-    assert.isNotNull(credentialVerification)
-    assert.isNotNull(credentialVerification!.verifiedAt)
+    await user.refresh()
+    assert.isNotNull(user.verifiedAt)
 
     const tokenInDb = await Token.find(verificationToken.identifier)
     assert.isNull(tokenInDb)
@@ -177,14 +183,12 @@ test.group('Customer auth', (group) => {
 
     response.assertStatus(403)
     response.assertBodyContains({
-      message: 'Invalid verification token',
+      message: 'The verification link is invalid or has expired.',
     })
   })
 
   test('should return error if email is already verified', async ({ client }) => {
-    const user = await UserFactory.with('credentials', 1, (cred) =>
-      cred.with('verification', 1)
-    ).create()
+    const user = await UserFactory.merge({ verifiedAt: DateTime.now() }).create()
 
     const verificationToken = await tokenService.create({
       user,
@@ -198,7 +202,7 @@ test.group('Customer auth', (group) => {
 
     response.assertStatus(403)
     response.assertBodyContains({
-      message: 'Email already verified',
+      message: 'Your email address has already been verified.',
     })
   })
 })

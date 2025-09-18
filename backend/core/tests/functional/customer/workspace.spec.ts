@@ -4,6 +4,7 @@ import User from '#models/user'
 import Workspace from '#models/workspace'
 import { blogStatusE, workspaceMemberRoleE } from '#types/literals'
 import testUtils from '@adonisjs/core/services/test_utils'
+import { DateTime } from 'luxon'
 
 test.group('Workspace', (group) => {
   let user: User
@@ -33,23 +34,27 @@ test.group('Workspace', (group) => {
 
   test('list workspaces for a user', async ({ client, assert }) => {
     const workspace = await Workspace.create({ name: 'Another Workspace' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('member') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('viewer'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client.get('/api/v1/customer/workspace').loginAs(user)
 
     response.assertStatus(200)
-    assert.isArray(response.body().workspaces)
-    assert.lengthOf(response.body().workspaces, 1)
-    assert.equal(response.body().workspaces[0].name, 'Another Workspace')
+    assert.isArray(response.body().data)
+    assert.lengthOf(response.body().data, 1)
+    assert.equal(response.body().data[0].name, 'Another Workspace')
   })
 
   test('show a workspace a user belongs to', async ({ client, assert }) => {
     const workspace = await Workspace.create({ name: 'Test Show Workspace' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('member') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('viewer'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client.get(`/api/v1/customer/workspace/${workspace.id}`).loginAs(user)
 
@@ -60,9 +65,11 @@ test.group('Workspace', (group) => {
   test('do not show a workspace a user does not belong to', async ({ client }) => {
     const otherUser = await UserFactory.create()
     const workspace = await Workspace.create({ name: 'Other User Workspace' })
-    await workspace
-      .related('members')
-      .create({ userId: otherUser.id, role: workspaceMemberRoleE('owner') })
+    await workspace.related('members').create({
+      userId: otherUser.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client.get(`/api/v1/customer/workspace/${workspace.id}`).loginAs(user)
 
@@ -71,9 +78,11 @@ test.group('Workspace', (group) => {
 
   test('owner can update workspace name', async ({ client, assert }) => {
     const workspace = await Workspace.create({ name: 'Original Name' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client
       .put(`/api/v1/customer/workspace/${workspace.id}`)
@@ -87,12 +96,16 @@ test.group('Workspace', (group) => {
   test('member cannot update workspace name', async ({ client }) => {
     const memberUser = await UserFactory.create()
     const workspace = await Workspace.create({ name: 'Original Name' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
-    await workspace
-      .related('members')
-      .create({ userId: memberUser.id, role: workspaceMemberRoleE('member') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
+    await workspace.related('members').create({
+      userId: memberUser.id,
+      role: workspaceMemberRoleE('viewer'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client
       .put(`/api/v1/customer/workspace/${workspace.id}`)
@@ -103,27 +116,42 @@ test.group('Workspace', (group) => {
   })
 
   test('owner can delete workspace', async ({ client, assert }) => {
-    const workspace = await Workspace.create({ name: 'To Be Deleted' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
+    const owner = await UserFactory.create()
 
-    const response = await client.delete(`/api/v1/customer/workspace/${workspace.id}`).loginAs(user)
+    await client
+      .post('/api/v1/customer/workspace')
+      .loginAs(owner)
+      .json({ name: 'My Test Workspace 1' })
+
+    const response2 = await client
+      .post('/api/v1/customer/workspace')
+      .loginAs(owner)
+      .json({ name: 'My Test Workspace 2' })
+
+    const workspaceIdToDelete = response2.body().workspace.id
+
+    const response = await client
+      .delete(`/api/v1/customer/workspace/${workspaceIdToDelete}`)
+      .loginAs(owner)
 
     response.assertStatus(200)
-    const deletedWorkspace = await Workspace.find(workspace.id)
+    const deletedWorkspace = await Workspace.find(workspaceIdToDelete)
     assert.isNull(deletedWorkspace)
   })
 
   test('member cannot delete workspace', async ({ client, assert }) => {
     const memberUser = await UserFactory.create()
     const workspace = await Workspace.create({ name: 'To Not Be Deleted' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
-    await workspace
-      .related('members')
-      .create({ userId: memberUser.id, role: workspaceMemberRoleE('member') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
+    await workspace.related('members').create({
+      userId: memberUser.id,
+      role: workspaceMemberRoleE('viewer'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client
       .delete(`/api/v1/customer/workspace/${workspace.id}`)
@@ -137,12 +165,16 @@ test.group('Workspace', (group) => {
   test('owner can transfer ownership to another member', async ({ client, assert }) => {
     const newOwner = await UserFactory.create()
     const workspace = await Workspace.create({ name: 'Transfer Test' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
-    await workspace
-      .related('members')
-      .create({ userId: newOwner.id, role: workspaceMemberRoleE('member') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
+    await workspace.related('members').create({
+      userId: newOwner.id,
+      role: workspaceMemberRoleE('viewer'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client
       .post(`/api/v1/customer/workspace/${workspace.id}/transfer`)
@@ -162,25 +194,26 @@ test.group('Workspace', (group) => {
       .where('user_id', newOwner.id)
       .first()
 
-    assert.equal(oldOwnerMember!.role, workspaceMemberRoleE('member'))
+    assert.equal(oldOwnerMember!.role, workspaceMemberRoleE('manager'))
     assert.equal(newOwnerMember!.role, workspaceMemberRoleE('owner'))
   })
 
   test('owner can add a new member', async ({ client, assert }) => {
-    const newMember = await UserFactory.with('credentials', 1, (cred) =>
-      cred.with('verification', 1)
-    ).create()
+    const newMember = await UserFactory.merge({
+      email: 'newmember@gmail.com',
+      verifiedAt: DateTime.now(),
+    }).create()
     const workspace = await Workspace.create({ name: 'Add Member Test' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
-
-    const newMemberCredential = await newMember.related('credentials').query().firstOrFail()
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client
       .post(`/api/v1/customer/workspace/${workspace.id}/member`)
       .loginAs(user)
-      .json({ email: newMemberCredential.identifier })
+      .json({ email: newMember.email })
 
     response.assertStatus(200)
     const member = await workspace.related('members').query().where('user_id', newMember.id).first()
@@ -190,12 +223,16 @@ test.group('Workspace', (group) => {
   test('owner can remove a member', async ({ client, assert }) => {
     const memberToRemove = await UserFactory.create()
     const workspace = await Workspace.create({ name: 'Remove Member Test' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
-    await workspace
-      .related('members')
-      .create({ userId: memberToRemove.id, role: workspaceMemberRoleE('member') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
+    await workspace.related('members').create({
+      userId: memberToRemove.id,
+      role: workspaceMemberRoleE('viewer'),
+      joinedAt: DateTime.now(),
+    })
 
     const response = await client
       .delete(`/api/v1/customer/workspace/${workspace.id}/member/${memberToRemove.id}`)
@@ -207,7 +244,7 @@ test.group('Workspace', (group) => {
       .query()
       .where('user_id', memberToRemove.id)
       .first()
-    assert.isNull(member)
+    assert.isNotNull(member!.leftAt)
   })
 })
 
@@ -219,9 +256,11 @@ test.group('Blog', (group) => {
     await testUtils.db().truncate()
     user = await UserFactory.create()
     workspace = await Workspace.create({ name: 'Blog Test Workspace' })
-    await workspace
-      .related('members')
-      .create({ userId: user.id, role: workspaceMemberRoleE('owner') })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
   })
 
   test('owner can create a blog', async ({ client, assert }) => {

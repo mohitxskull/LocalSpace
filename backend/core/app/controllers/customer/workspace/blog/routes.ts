@@ -17,8 +17,13 @@ export const blogRoutes = () => {
           router.post('publish', [
             () => import('#controllers/customer/workspace/blog/publish_controller'),
           ])
+
           router.post('unpublish', [
             () => import('#controllers/customer/workspace/blog/unpublish_controller'),
+          ])
+
+          router.post('archive', [
+            () => import('#controllers/customer/workspace/blog/archive_controller'),
           ])
         })
         .prefix(':blogId')

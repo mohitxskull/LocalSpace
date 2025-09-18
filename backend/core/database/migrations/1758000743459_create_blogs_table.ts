@@ -1,6 +1,5 @@
 import { ULID_LENGTH } from '#config/ulid'
 import { dbRef } from '#database/reference'
-import { blogStatusE } from '#types/literals'
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
@@ -22,7 +21,7 @@ export default class extends BaseSchema {
 
       t.string(dbRef.blog.title).notNullable()
       t.text(dbRef.blog.content).notNullable()
-      t.string(dbRef.blog.status).notNullable().defaultTo(blogStatusE('draft'))
+      t.string(dbRef.blog.status).notNullable()
 
       t.timestamp(dbRef.blog.createdAt).notNullable()
       t.timestamp(dbRef.blog.updatedAt).notNullable()

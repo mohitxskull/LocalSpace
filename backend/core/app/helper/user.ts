@@ -10,6 +10,6 @@ export class UserHelper extends BaseHelper<User> {
       .query()
       .andWhere(dbRef.workspaceMember.role, workspaceMemberRoleE('owner'))
       .count('*', 'total')
-      .then((result) => result.pop()?.total || 0)
+      .then((result) => result.pop()?.$extras.total || 0)
   }
 }
