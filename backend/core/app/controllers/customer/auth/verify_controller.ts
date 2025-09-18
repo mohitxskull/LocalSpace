@@ -1,11 +1,11 @@
 import vine from '@vinejs/vine'
 import type { HttpContext } from '@adonisjs/core/http'
-import { setting } from '#config/setting'
 import { ForbiddenException } from '@localspace/node-lib/exception'
 import tokenService from '#services/token_service'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
+import { getSetting } from '#util/get_setting'
 
 export const input = vine.compile(
   vine.object({
@@ -15,6 +15,7 @@ export const input = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
+    const setting = getSetting()
     if (!setting.credential.email.verification.enabled) {
       throw new ForbiddenException('Email verification is currently disabled.')
     }

@@ -2,7 +2,6 @@ import { BadRequestException, ForbiddenException } from '@localspace/node-lib/ex
 import vine from '@vinejs/vine'
 import type { HttpContext } from '@adonisjs/core/http'
 import { CustomerEMailS, CustomerPasswordS } from '#validators/customer'
-import { setting } from '#config/setting'
 import User from '#models/user'
 import { dbRef } from '#database/reference'
 import hash from '@adonisjs/core/services/hash'
@@ -11,6 +10,7 @@ import Token from '#models/token'
 import { tokenTypeE } from '#types/literals'
 import limiter from '@adonisjs/limiter/services/main'
 import tokenService from '#services/token_service'
+import { getSetting } from '#util/get_setting'
 
 export const input = vine.compile(
   vine.object({
@@ -21,6 +21,7 @@ export const input = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
+    const setting = getSetting()
     if (!setting.customer.signIn.active) {
       throw new ForbiddenException('Sign-in is currently disabled.')
     }

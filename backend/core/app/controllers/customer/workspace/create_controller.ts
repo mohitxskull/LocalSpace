@@ -4,9 +4,9 @@ import { workspaceMemberRoleE } from '#types/literals'
 import vine from '@vinejs/vine'
 import db from '@adonisjs/lucid/services/db'
 import { ForbiddenException } from '@localspace/node-lib/exception'
-import { setting } from '#config/setting'
 import { WorkspaceNameS } from '#validators/workspace'
 import { DateTime } from 'luxon'
+import { getSetting } from '#util/get_setting'
 
 export const input = vine.compile(
   vine.object({
@@ -16,6 +16,7 @@ export const input = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
+    const setting = getSetting()
     const user = ctx.auth.getUserOrFail()
 
     const payload = await ctx.request.validateUsing(input)

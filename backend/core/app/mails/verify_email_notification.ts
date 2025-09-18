@@ -1,9 +1,9 @@
-import { setting } from '#config/setting'
 import User from '#models/user'
 import env from '#start/env'
 import router from '@adonisjs/core/services/router'
 import { BaseMail } from '@adonisjs/mail'
 import { TokenHolder as AccessTokenHolder } from '#modules/token_module'
+import { getSetting } from '#util/get_setting'
 
 export default class VerifyEmailNotification extends BaseMail {
   subject = 'Verify your email'
@@ -22,6 +22,7 @@ export default class VerifyEmailNotification extends BaseMail {
    * the email is sent or queued.
    */
   prepare() {
+    const setting = getSetting()
     const userName = this.params.user.name
     const email = this.params.user.email
 

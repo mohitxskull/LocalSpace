@@ -8,7 +8,6 @@ import { dbRef } from '#database/reference'
 import { ulid } from '#config/ulid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { UserTransformer } from '#transformers/user'
-import { setting } from '#config/setting'
 import Token from './token.js'
 import { tokenTypeE, type RoleT } from '#types/literals'
 import cache from '@adonisjs/cache/services/main'
@@ -16,6 +15,7 @@ import { UserCacher } from '../cacher/user.js'
 import WorkspaceMember from './workspace_member.js'
 import hash from '@adonisjs/core/services/hash'
 import { UserHelper } from '#helper/user'
+import { getSetting } from '#util/get_setting'
 
 export default class User extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -72,7 +72,7 @@ export default class User extends BaseModel {
   // Extra =============================
 
   static accessTokens = DbAccessTokensProvider.forModel(User, {
-    expiresIn: setting.session.expiresIn,
+    expiresIn: getSetting().session.expiresIn,
     type: tokenTypeE('access'),
     table: dbRef.token.table.name,
     tokenSecretLength: 42,

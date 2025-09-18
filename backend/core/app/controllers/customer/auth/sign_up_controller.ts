@@ -2,7 +2,6 @@ import { BadRequestException, ForbiddenException } from '@localspace/node-lib/ex
 import vine from '@vinejs/vine'
 import type { HttpContext } from '@adonisjs/core/http'
 import { CustomerEMailS, CustomerNameS, CustomerPasswordS } from '#validators/customer'
-import { setting } from '#config/setting'
 import { dbRef } from '#database/reference'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
@@ -13,6 +12,7 @@ import { tokenTypeE, roleE, workspaceMemberRoleE } from '#types/literals'
 import limiter from '@adonisjs/limiter/services/main'
 import Workspace from '#models/workspace'
 import WorkspaceMember from '#models/workspace_member'
+import { getSetting } from '#util/get_setting'
 
 export const input = vine.compile(
   vine.object({
@@ -25,6 +25,7 @@ export const input = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
+    const setting = getSetting()
     if (!setting.customer.signUp.active) {
       throw new ForbiddenException('Sign-up is currently disabled.')
     }

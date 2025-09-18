@@ -6,7 +6,7 @@ import { ForbiddenException } from '@localspace/node-lib/exception'
 import { workspaceMemberRoleE } from '#types/literals'
 import { ULIDS } from '#validators/index'
 import { dbRef } from '#database/reference'
-import { setting } from '#config/setting'
+import { getSetting } from '#util/get_setting'
 
 export const input = vine.compile(
   vine.object({
@@ -20,6 +20,7 @@ export const input = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
+    const setting = getSetting()
     const user = ctx.auth.getUserOrFail()
 
     const payload = await ctx.request.validateUsing(input)

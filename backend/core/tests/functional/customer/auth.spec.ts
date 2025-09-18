@@ -10,10 +10,12 @@ import User from '#models/user'
 import { DateTime } from 'luxon'
 import testUtils from '@adonisjs/core/services/test_utils'
 import Workspace from '#models/workspace'
+import app from '@adonisjs/core/services/app'
 
 test.group('Customer auth', (group) => {
   group.each.setup(async () => {
     await testUtils.db().truncate()
+    app.config.set('setting.customer.signIn.active', true)
   })
 
   group.each.teardown(() => {
@@ -133,7 +135,7 @@ test.group('Customer auth', (group) => {
 
   test('should not sign in an unverified user', async ({ client }) => {
     const password = 'password'
-    const userEmail = 'unverified@gmail.com'
+    const userEmail = 'unverified-signin@gmail.com'
 
     await UserFactory.merge({ email: userEmail, password: password }).create()
 
@@ -204,5 +206,111 @@ test.group('Customer auth', (group) => {
     response.assertBodyContains({
       message: 'Your email address has already been verified.',
     })
+  })
+
+  test('should get user profile when authenticated', async ({ client, assert }) => {
+    const user = await UserFactory.create()
+
+    const response = await client.get('/api/v1/customer/auth/profile').loginAs(user)
+
+    response.assertStatus(200)
+    assert.equal(response.body().user.id, user.id)
+    assert.equal(response.body().user.email, user.email)
+  })
+
+  test('should resend verification email', async ({ client }) => {
+    const user = await UserFactory.merge({ email: 'resend@gmail.com' }).create()
+    const { mails } = mail.fake()
+
+    const response = await client.post('/api/v1/customer/auth/verify/resend').json({
+      email: user.email,
+    })
+
+    response.assertStatus(200)
+
+    mails.assertQueued(VerifyEmailNotification, (email) => {
+      email.message.assertTo(user.email)
+      return true
+    })
+  })
+
+  test('should not allow sign up if disabled', async ({ client }) => {
+    app.config.set('setting.customer.signUp.active', false)
+
+    const response = await client.post('/api/v1/customer/auth/sign-up').json({
+      name: 'test',
+      email: 'test@gmail.com',
+      password: 'password',
+      confirmPassword: 'password',
+    })
+
+    response.assertStatus(403)
+    response.assertBodyContains({ message: 'Sign-up is currently disabled.' })
+  })
+
+  test('should not sign in if sign-in is disabled', async ({ client }) => {
+    app.config.set('setting.customer.signIn.active', false)
+
+    const response = await client.post('/api/v1/customer/auth/sign-in').json({
+      email: 'test@gmail.com',
+      password: 'password',
+    })
+
+    response.assertStatus(403)
+    response.assertBodyContains({ message: 'Sign-in is currently disabled.' })
+  })
+
+  test('should rate limit sign-in attempts', async ({ client }) => {
+    const userEmail = 'rate-limit@gmail.com'
+    const password = 'password'
+
+    await UserFactory.merge({
+      email: userEmail,
+      password: password,
+      verifiedAt: DateTime.now(),
+    }).create()
+
+    const promises = []
+    for (let i = 0; i < 6; i++) {
+      promises.push(
+        client.post('/api/v1/customer/auth/sign-in').json({
+          email: userEmail,
+          password: 'wrong-password',
+        })
+      )
+    }
+
+    const responses = await Promise.all(promises)
+
+    const lastResponse = responses[5]
+    lastResponse.assertStatus(429)
+  }).timeout(10000)
+
+  test('should enforce session limit', async ({ client, assert }) => {
+    const password = 'password'
+    const userEmail = 'session-limit@gmail.com'
+
+    const user = await UserFactory.merge({
+      email: userEmail,
+      password: password,
+      verifiedAt: DateTime.now(),
+    }).create()
+
+    // Log in 3 times
+    await client.post('/api/v1/customer/auth/sign-in').json({
+      email: userEmail,
+      password: password,
+    })
+    await client.post('/api/v1/customer/auth/sign-in').json({
+      email: userEmail,
+      password: password,
+    })
+    await client.post('/api/v1/customer/auth/sign-in').json({
+      email: userEmail,
+      password: password,
+    })
+
+    const tokens = await Token.query().where('tokenableId', user.id).andWhere('type', 'access')
+    assert.lengthOf(tokens, 2)
   })
 })

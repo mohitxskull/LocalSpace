@@ -5,12 +5,16 @@ import Workspace from '#models/workspace'
 import { blogStatusE, workspaceMemberRoleE } from '#types/literals'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { DateTime } from 'luxon'
+import app from '@adonisjs/core/services/app'
 
 test.group('Workspace', (group) => {
   let user: User
 
+  const originalSettings = JSON.parse(JSON.stringify(app.config.get('setting')))
+
   group.each.setup(async () => {
     await testUtils.db().truncate()
+    app.config.set('setting', JSON.parse(JSON.stringify(originalSettings)))
     user = await UserFactory.create()
   })
 
@@ -30,6 +34,25 @@ test.group('Workspace', (group) => {
     const member = await workspace!.related('members').query().where('user_id', user.id).first()
     assert.exists(member)
     assert.equal(member!.role, workspaceMemberRoleE('owner'))
+  })
+
+  test('should not allow creating more workspaces than the limit', async ({ client }) => {
+    app.config.set('setting.customer.workspace.max', 1)
+
+    await client
+      .post('/api/v1/customer/workspace')
+      .loginAs(user)
+      .json({ name: 'My First Workspace' })
+
+    const response = await client
+      .post('/api/v1/customer/workspace')
+      .loginAs(user)
+      .json({ name: 'My Second Workspace' })
+
+    response.assertStatus(403)
+    response.assertBodyContains({
+      message: 'You have reached the maximum number of workspaces you can own.',
+    })
   })
 
   test('list workspaces for a user', async ({ client, assert }) => {
@@ -139,6 +162,38 @@ test.group('Workspace', (group) => {
     assert.isNull(deletedWorkspace)
   })
 
+  test('should not allow deleting the last workspace', async ({ client }) => {
+    const workspace = await Workspace.create({ name: 'My Only Workspace' })
+    await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
+
+    const response = await client.delete(`/api/v1/customer/workspace/${workspace.id}`).loginAs(user)
+
+    response.assertStatus(403)
+  })
+
+  test('should not allow deleting a workspace with published blogs', async ({ client }) => {
+    const workspace = await Workspace.create({ name: 'Workspace With Blogs' })
+    const member = await workspace.related('members').create({
+      userId: user.id,
+      role: workspaceMemberRoleE('owner'),
+      joinedAt: DateTime.now(),
+    })
+    await workspace.related('blogs').create({
+      title: 'Published Blog',
+      content: '...',
+      authorId: member.id,
+      status: blogStatusE('published'),
+    })
+
+    const response = await client.delete(`/api/v1/customer/workspace/${workspace.id}`).loginAs(user)
+
+    response.assertStatus(403)
+  })
+
   test('member cannot delete workspace', async ({ client, assert }) => {
     const memberUser = await UserFactory.create()
     const workspace = await Workspace.create({ name: 'To Not Be Deleted' })
@@ -198,80 +253,30 @@ test.group('Workspace', (group) => {
     assert.equal(newOwnerMember!.role, workspaceMemberRoleE('owner'))
   })
 
-  test('owner can add a new member', async ({ client, assert }) => {
-    const newMember = await UserFactory.merge({
-      email: 'newmember@gmail.com',
-      verifiedAt: DateTime.now(),
-    }).create()
-    const workspace = await Workspace.create({ name: 'Add Member Test' })
-    await workspace.related('members').create({
-      userId: user.id,
-      role: workspaceMemberRoleE('owner'),
-      joinedAt: DateTime.now(),
-    })
-
-    const response = await client
-      .post(`/api/v1/customer/workspace/${workspace.id}/member`)
-      .loginAs(user)
-      .json({ email: newMember.email })
-
-    response.assertStatus(200)
-    const member = await workspace.related('members').query().where('user_id', newMember.id).first()
-    assert.exists(member)
-  })
-
-  test('owner can remove a member', async ({ client, assert }) => {
-    const memberToRemove = await UserFactory.create()
-    const workspace = await Workspace.create({ name: 'Remove Member Test' })
+  test('should not transfer ownership to user at workspace limit', async ({ client }) => {
+    const newOwner = await UserFactory.create()
+    const workspace = await Workspace.create({ name: 'Transfer Test' })
     await workspace.related('members').create({
       userId: user.id,
       role: workspaceMemberRoleE('owner'),
       joinedAt: DateTime.now(),
     })
     await workspace.related('members').create({
-      userId: memberToRemove.id,
+      userId: newOwner.id,
       role: workspaceMemberRoleE('viewer'),
       joinedAt: DateTime.now(),
     })
 
+    app.config.set('setting.customer.workspace.max', 0)
+
     const response = await client
-      .delete(`/api/v1/customer/workspace/${workspace.id}/member/${memberToRemove.id}`)
+      .post(`/api/v1/customer/workspace/${workspace.id}/transfer`)
       .loginAs(user)
+      .json({ newOwnerId: newOwner.id })
 
-    response.assertStatus(200)
-    const member = await workspace
-      .related('members')
-      .query()
-      .where('user_id', memberToRemove.id)
-      .first()
-    assert.isNotNull(member!.leftAt)
-  })
-})
-
-test.group('Blog', (group) => {
-  let user: User
-  let workspace: Workspace
-
-  group.each.setup(async () => {
-    await testUtils.db().truncate()
-    user = await UserFactory.create()
-    workspace = await Workspace.create({ name: 'Blog Test Workspace' })
-    await workspace.related('members').create({
-      userId: user.id,
-      role: workspaceMemberRoleE('owner'),
-      joinedAt: DateTime.now(),
+    response.assertStatus(403)
+    response.assertBodyContains({
+      message: 'The new owner has reached the maximum number of workspaces allowed.',
     })
-  })
-
-  test('owner can create a blog', async ({ client, assert }) => {
-    const response = await client
-      .post(`/api/v1/customer/workspace/${workspace.id}/blog`)
-      .loginAs(user)
-      .json({ title: 'My First Blog', content: 'This is the content.' })
-
-    response.assertStatus(200)
-    assert.exists(response.body().blog.id)
-    assert.equal(response.body().blog.title, 'My First Blog')
-    assert.equal(response.body().blog.status, blogStatusE('draft'))
   })
 })

@@ -1,4 +1,4 @@
-export const setting = {
+export default {
   customer: {
     signIn: {
       active: true,

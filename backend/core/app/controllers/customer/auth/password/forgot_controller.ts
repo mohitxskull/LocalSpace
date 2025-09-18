@@ -5,9 +5,9 @@ import { CustomerEMailS } from '#validators/customer'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import tokenService from '#services/token_service'
-import { setting } from '#config/setting'
 import mail from '@adonisjs/mail/services/main'
 import PasswordResetNotification from '#mails/password_reset_notification'
+import { getSetting } from '#util/get_setting'
 
 export const input = vine.compile(
   vine.object({
@@ -20,6 +20,8 @@ export default class Controller {
     const payload = await ctx.request.validateUsing(input)
 
     const user = await User.query().where(dbRef.user.email, payload.email).first()
+
+    const setting = getSetting()
 
     if (user) {
       const accessTokenHolder = await tokenService.create(

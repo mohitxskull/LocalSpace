@@ -5,9 +5,9 @@ import { CustomerEMailS } from '#validators/customer'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
 import tokenService from '#services/token_service'
-import { setting } from '#config/setting'
 import mail from '@adonisjs/mail/services/main'
 import VerifyEmailNotification from '#mails/verify_email_notification'
+import { getSetting } from '#util/get_setting'
 
 export const input = vine.compile(
   vine.object({
@@ -17,6 +17,7 @@ export const input = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
+    const setting = getSetting()
     const payload = await ctx.request.validateUsing(input)
 
     const user = await User.query()

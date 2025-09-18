@@ -3,9 +3,9 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Workspace from '#models/workspace'
 import vine from '@vinejs/vine'
 import { ULIDS } from '#validators/index'
-import { setting } from '#config/setting'
 import { ForbiddenException } from '@localspace/node-lib/exception'
 import { blogStatusE } from '#types/literals'
+import { getSetting } from '#util/get_setting'
 
 export const validator = vine.compile(
   vine.object({
@@ -19,6 +19,7 @@ export const validator = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
+    const setting = getSetting()
     const user = ctx.auth.getUserOrFail()
     const payload = await ctx.request.validateUsing(validator)
 

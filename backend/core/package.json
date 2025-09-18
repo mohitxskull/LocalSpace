@@ -42,7 +42,8 @@
     "#miscellaneous/*": "./app/miscellaneous/*.js",
     "#types/*": "./types/*.js",
     "#cacher/*": "./app/cacher/*.js",
-    "#helper/*": "./app/helper/*.js"
+    "#helper/*": "./app/helper/*.js",
+    "#util/*": "./app/util/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
