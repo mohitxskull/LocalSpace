@@ -22,7 +22,7 @@ export const input = vine.compile(
 export default class Controller {
   async handle(ctx: HttpContext) {
     if (!setting.customer.signIn.active) {
-      throw new ForbiddenException(ctx.i18n.t('customer.auth.sign_in.disabled'))
+      throw new ForbiddenException('Sign-in is currently disabled.')
     }
 
     const payload = await ctx.request.validateUsing(input)
@@ -42,21 +42,21 @@ export default class Controller {
       if (!user) {
         await hash.make(payload.password)
 
-        throw new BadRequestException(ctx.i18n.t('customer.auth.sign_in.invalid_credentials'), {
+        throw new BadRequestException('Invalid email or password.', {
           source: 'email',
           reason: 'Email not found',
         })
       }
 
       if (!user.password) {
-        throw new BadRequestException(ctx.i18n.t('customer.auth.sign_in.invalid_credentials'), {
+        throw new BadRequestException('Invalid email or password.', {
           source: 'email',
           reason: 'Password not set',
         })
       }
 
       if (!(await hash.verify(user.password, payload.password))) {
-        throw new BadRequestException(ctx.i18n.t('customer.auth.sign_in.invalid_credentials'), {
+        throw new BadRequestException('Invalid email or password.', {
           source: 'email',
           reason: 'Password is incorrect',
         })
@@ -66,7 +66,7 @@ export default class Controller {
 
       if (emailVerificationRequired && !user.verifiedAt) {
         throw new BadRequestException(
-          ctx.i18n.t('customer.auth.sign_in.email_verification_required'),
+          'Your email address is not verified. Please check your inbox for a verification link.',
           {
             code: 'EMAIL_NOT_VERIFIED',
             source: 'email',
@@ -112,7 +112,7 @@ export default class Controller {
 
       return {
         token: token.serialize(),
-        message: ctx.i18n.t('customer.auth.sign_in.success'),
+        message: 'You have been signed in successfully.',
       }
     } catch (error) {
       await trx.rollback()

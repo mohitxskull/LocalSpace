@@ -33,7 +33,7 @@ export default class Controller {
       .first()
 
     if (!userToAdd) {
-      throw new NotFoundException(ctx.i18n.t('customer.workspace.member.store.user_not_found'))
+      throw new NotFoundException('No verified user was found with the provided email address.')
     }
 
     const userToAddMember = await workspace
@@ -44,7 +44,7 @@ export default class Controller {
 
     if (userToAddMember) {
       if (userToAddMember.joinedAt && !userToAddMember.leftAt) {
-        throw new BadRequestException(ctx.i18n.t('customer.workspace.member.store.already_member'))
+        throw new BadRequestException('This user is already a member of the workspace.')
       }
 
       if (userToAddMember.leftAt) {
@@ -62,6 +62,6 @@ export default class Controller {
 
     await Workspace.cacher.activeMembers({ workspace }).expire()
 
-    return { message: ctx.i18n.t('customer.workspace.member.store.success') }
+    return { message: 'The user has been successfully added to the workspace.' }
   }
 }

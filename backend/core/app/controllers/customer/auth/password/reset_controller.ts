@@ -32,7 +32,7 @@ export default class Controller {
       )
 
       if (!accessTokenHolder) {
-        throw new ForbiddenException(ctx.i18n.t('customer.auth.password.reset.invalid_token'))
+        throw new ForbiddenException('The provided token is invalid or has expired.')
       }
 
       const user = await User.find(accessTokenHolder.tokenableId, {
@@ -40,7 +40,7 @@ export default class Controller {
       })
 
       if (!user) {
-        throw new ForbiddenException(ctx.i18n.t('customer.auth.password.reset.invalid_token'))
+        throw new ForbiddenException('The provided token is invalid or has expired.')
       }
 
       user.password = payload.newPassword
@@ -52,7 +52,7 @@ export default class Controller {
       await trx.commit()
 
       return {
-        message: ctx.i18n.t('customer.auth.password.reset.success'),
+        message: 'Your password has been successfully reset.',
       }
     } catch (error) {
       await trx.rollback()

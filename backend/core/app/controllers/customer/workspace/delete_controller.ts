@@ -22,7 +22,7 @@ export default class Controller {
     await workspace.delete()
 
     return {
-      message: ctx.i18n.t('customer.workspace.delete.success'),
+      message: 'Workspace deleted successfully.',
     }
   }
 }

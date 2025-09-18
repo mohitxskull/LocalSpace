@@ -27,14 +27,14 @@ export default class Controller {
 
     if (user.id === payload.params.memberId) {
       throw new BadRequestException(
-        ctx.i18n.t('customer.workspace.member.delete.cannot_remove_self')
+        'You cannot remove yourself from a workspace. Please use the "Leave Workspace" option instead.'
       )
     }
 
     const memberToRemove = await workspace
       .related('members')
       .query()
-      .where(dbRef.workspaceMember.id, payload.params.memberId)
+      .where(dbRef.workspaceMember.userId, payload.params.memberId)
       .andWhereNotNull(dbRef.workspaceMember.joinedAt)
       .andWhereNull(dbRef.workspaceMember.leftAt)
       .firstOrFail()
@@ -45,6 +45,6 @@ export default class Controller {
 
     await Workspace.cacher.activeMembers({ workspace }).expire()
 
-    return { message: ctx.i18n.t('customer.workspace.member.delete.success') }
+    return { message: 'The member has been removed from the workspace.' }
   }
 }

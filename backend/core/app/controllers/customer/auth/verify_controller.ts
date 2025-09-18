@@ -16,7 +16,7 @@ export const input = vine.compile(
 export default class Controller {
   async handle(ctx: HttpContext) {
     if (!setting.credential.email.verification.enabled) {
-      throw new ForbiddenException(ctx.i18n.t('customer.auth.verify.disabled'))
+      throw new ForbiddenException('Email verification is currently disabled.')
     }
 
     const trx = await db.transaction()
@@ -35,7 +35,7 @@ export default class Controller {
       )
 
       if (!accessTokenHolder) {
-        throw new ForbiddenException(ctx.i18n.t('customer.auth.verify.invalid'))
+        throw new ForbiddenException('The verification link is invalid or has expired.')
       }
 
       const user = await User.find(accessTokenHolder.tokenableId, {
@@ -43,14 +43,15 @@ export default class Controller {
       })
 
       if (!user) {
-        throw new ForbiddenException(ctx.i18n.t('customer.auth.verify.invalid'))
+        throw new ForbiddenException('The verification link is invalid or has expired.')
       }
 
       if (user.verifiedAt) {
-        throw new ForbiddenException(ctx.i18n.t('customer.auth.verify.already_verified'))
+        throw new ForbiddenException('Your email address has already been verified.')
       }
 
       user.verifiedAt = DateTime.now()
+
       await user.save()
 
       await accessTokenHolder.delete({ client: trx })
@@ -58,7 +59,7 @@ export default class Controller {
       await trx.commit()
 
       return {
-        message: ctx.i18n.t('customer.auth.verify.success'),
+        message: 'Your email address has been verified successfully.',
       }
     } catch (error) {
       await trx.rollback()

@@ -18,14 +18,8 @@ export default class Controller {
 
     const payload = await ctx.request.validateUsing(input)
 
-    if (!user.password) {
-      throw new BadRequestException(ctx.i18n.t('customer.auth.password.update.invalid_password'), {
-        source: 'oldPassword',
-      })
-    }
-
     if (!(await hash.verify(user.password, payload.oldPassword))) {
-      throw new BadRequestException(ctx.i18n.t('customer.auth.password.update.invalid_password'), {
+      throw new BadRequestException('The old password you entered is incorrect.', {
         source: 'oldPassword',
       })
     }
@@ -36,7 +30,7 @@ export default class Controller {
 
     return {
       user: await user.transformer.serialize(),
-      message: ctx.i18n.t('customer.auth.password.update.success'),
+      message: 'Your password has been updated successfully.',
     }
   }
 }

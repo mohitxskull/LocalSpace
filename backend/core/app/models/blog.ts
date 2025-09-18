@@ -4,7 +4,7 @@ import { dbRef } from '#database/reference'
 import { ulid } from '#config/ulid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Workspace from './workspace.js'
-import { type BlogStatusT } from '#types/literals'
+import { blogStatusE, type BlogStatusT } from '#types/literals'
 import { BlogTransformer } from '#transformers/blog'
 import WorkspaceMember from './workspace_member.js'
 
@@ -61,5 +61,17 @@ export default class Blog extends BaseModel {
 
   get transformer() {
     return new BlogTransformer(this)
+  }
+
+  get isDraft() {
+    return this.status === blogStatusE('draft')
+  }
+
+  get isPublished() {
+    return this.status === blogStatusE('published')
+  }
+
+  get isArchived() {
+    return this.status === blogStatusE('archived')
   }
 }

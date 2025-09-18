@@ -3,9 +3,6 @@ import logger from '@adonisjs/core/services/logger'
 import ace from '@adonisjs/core/services/ace'
 import db from '@adonisjs/lucid/services/db'
 import TokenModule from '#modules/token_module'
-import { RIManager } from '@localspace/node-lib'
-import { permissionSchema } from '#config/permissions'
-import env from '#start/env'
 
 export default class BootProvider {
   constructor(protected app: ApplicationService) {
@@ -24,11 +21,6 @@ export default class BootProvider {
       return new TokenModule()
     })
     this.app.container.alias('token', TokenModule)
-
-    this.app.container.singleton(RIManager, () => {
-      return new RIManager(env.get('APP_NAME'), permissionSchema)
-    })
-    this.app.container.alias('riManager', RIManager)
   }
 
   /**
@@ -87,6 +79,5 @@ export default class BootProvider {
 declare module '@adonisjs/core/types' {
   interface ContainerBindings {
     token: TokenModule
-    riManager: RIManager<typeof permissionSchema>
   }
 }

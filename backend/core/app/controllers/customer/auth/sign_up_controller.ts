@@ -26,7 +26,7 @@ export const input = vine.compile(
 export default class Controller {
   async handle(ctx: HttpContext) {
     if (!setting.customer.signUp.active) {
-      throw new ForbiddenException(ctx.i18n.t('customer.auth.sign_up.disabled'))
+      throw new ForbiddenException('Sign-up is currently disabled.')
     }
 
     const payload = await ctx.request.validateUsing(input)
@@ -51,7 +51,7 @@ export default class Controller {
       )
 
       if (userExists) {
-        throw new BadRequestException(ctx.i18n.t('customer.auth.sign_up.email_exists'), {
+        throw new BadRequestException('An account with this email address already exists.', {
           source: 'email',
           reason: 'Email already exists',
         })
@@ -106,11 +106,9 @@ export default class Controller {
 
       return {
         user: await user.transformer.serialize(),
-        message: ctx.i18n.t(
-          emailVerificationRequired
-            ? 'customer.auth.sign_up.email_verification_required'
-            : 'customer.auth.sign_up.success'
-        ),
+        message: emailVerificationRequired
+          ? 'Your account has been created. Please check your email to verify your account.'
+          : 'Your account has been created successfully.',
         meta: {
           email: {
             verificationRequired: emailVerificationRequired,

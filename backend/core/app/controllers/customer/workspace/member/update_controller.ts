@@ -29,22 +29,20 @@ export default class Controller {
     await ctx.bouncer.with('WorkspacePolicy').authorize('manageMembers', workspace)
 
     if (user.id === payload.params.memberId) {
-      throw new BadRequestException(
-        ctx.i18n.t('customer.workspace.member.update.cannot_update_self')
-      )
+      throw new BadRequestException('You cannot change your own role within the workspace.')
     }
 
     const memberToUpdate = await workspace
       .related('members')
       .query()
-      .where(dbRef.workspaceMember.id, payload.params.memberId)
+      .where(dbRef.workspaceMember.userId, payload.params.memberId)
       .andWhereNotNull(dbRef.workspaceMember.joinedAt)
       .andWhereNull(dbRef.workspaceMember.leftAt)
       .firstOrFail()
 
     if (memberToUpdate.role === workspaceMemberRoleE('owner')) {
       throw new BadRequestException(
-        ctx.i18n.t('customer.workspace.member.update.cannot_change_owner_role')
+        "The owner's role cannot be changed. To change ownership, please transfer the workspace to another member."
       )
     }
 
@@ -54,6 +52,6 @@ export default class Controller {
 
     await Workspace.cacher.activeMembers({ workspace }).expire()
 
-    return { message: ctx.i18n.t('customer.workspace.member.update.success') }
+    return { message: "The member's role has been updated successfully." }
   }
 }

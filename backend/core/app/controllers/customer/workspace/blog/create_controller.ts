@@ -25,8 +25,6 @@ export default class Controller {
 
     await ctx.bouncer.with('BlogPolicy').authorize('create', workspace)
 
-    const member = await workspace.getMemberOrFail({ user })
-
     const blogCount = await workspace.related('blogs').query().count('*', 'total').first()
 
     console.log('Blog Count: ', blogCount)
@@ -36,6 +34,8 @@ export default class Controller {
         'You have reached the maximum number of blogs for this workspace.'
       )
     }
+
+    const member = await workspace.getMemberOrFail({ user })
 
     const blog = await workspace.related('blogs').create({
       title: payload.title,

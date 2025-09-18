@@ -42,7 +42,7 @@ export default class Controller {
     }
 
     return {
-      message: ctx.i18n.t('customer.auth.password.forgot.success'),
+      message: 'If an account with this email exists, a password reset link has been sent.',
     }
   }
 }

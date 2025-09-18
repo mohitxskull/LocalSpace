@@ -45,7 +45,8 @@ export default class Controller {
     }
 
     return {
-      message: ctx.i18n.t('customer.auth.verify.resend_success'),
+      message:
+        'If an unverified account with this email exists, a new verification link has been sent.',
     }
   }
 }

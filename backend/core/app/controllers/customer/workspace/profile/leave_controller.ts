@@ -35,7 +35,7 @@ export default class Controller {
 
     if (member.role === workspaceMemberRoleE('owner')) {
       throw new BadRequestException(
-        ctx.i18n.t('customer.workspace.profile.leave.cannot_leave_as_owner')
+        'As the workspace owner, you cannot leave. Please transfer ownership to another member first.'
       )
     }
 
@@ -45,6 +45,6 @@ export default class Controller {
 
     await Workspace.cacher.activeMembers({ workspace }).expire()
 
-    return { message: ctx.i18n.t('customer.workspace.profile.leave.success') }
+    return { message: 'You have successfully left the workspace.' }
   }
 }

@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import Blog from '#models/blog'
 import { blogStatusE } from '#types/literals'
 import vine from '@vinejs/vine'
 import { ULIDS } from '#validators/index'
 import Workspace from '#models/workspace'
+import { dbRef } from '#database/reference'
 
-export const validator = vine.compile(
+export const input = vine.compile(
   vine.object({
     params: vine.object({
       workspaceId: ULIDS(),
@@ -16,9 +16,16 @@ export const validator = vine.compile(
 
 export default class Controller {
   async handle(ctx: HttpContext) {
-    const payload = await ctx.request.validateUsing(validator)
+    const payload = await ctx.request.validateUsing(input)
+
     const workspace = await Workspace.findOrFail(payload.params.workspaceId)
-    const blog = await Blog.findOrFail(payload.params.blogId)
+
+    const blog = await workspace
+      .related('blogs')
+      .query()
+      .where(dbRef.blog.id, payload.params.blogId)
+      .firstOrFail()
+
     await ctx.bouncer.with('BlogPolicy').authorize('publish', workspace, blog)
 
     blog.status = blogStatusE('published')

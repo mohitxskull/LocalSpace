@@ -66,7 +66,6 @@ export default defineConfig({
     () => import('@nemoventures/adonis-jobs/queue_provider'),
     () => import('@julr/adonisjs-prometheus/prometheus_provider'),
     () => import('@adonisjs/cache/cache_provider'),
-    () => import('@adonisjs/i18n/i18n_provider'),
     () => import('@adonisjs/core/providers/edge_provider'),
     () => import('@adonisjs/transmit/transmit_provider'),
   ],
@@ -120,10 +119,6 @@ export default defineConfig({
   },
 
   metaFiles: [
-    {
-      pattern: 'resources/lang/**/*.{json,yaml,yml}',
-      reloadServer: false,
-    },
     {
       pattern: 'resources/views/**/*.edge',
       reloadServer: false,
