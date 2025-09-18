@@ -50,7 +50,7 @@ export default class Controller {
 
     await memberToUpdate.save()
 
-    await Workspace.cacher.activeMembers({ workspace }).expire()
+    await Workspace.cacher.getActiveMembers({ workspace }).expire()
 
     return { message: "The member's role has been updated successfully." }
   }

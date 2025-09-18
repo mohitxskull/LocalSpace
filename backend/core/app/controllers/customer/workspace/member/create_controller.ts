@@ -1,4 +1,4 @@
-import { WorkspaceMemberRoleS } from '#validators/workspace_member'
+import { WorkspaceMemberUpdatableRoleS } from '#validators/workspace_member'
 import type { HttpContext } from '@adonisjs/core/http'
 import Workspace from '#models/workspace'
 import vine from '@vinejs/vine'
@@ -8,6 +8,7 @@ import User from '#models/user'
 import { dbRef } from '#database/reference'
 import { ULIDS } from '#validators/index'
 import { DateTime } from 'luxon'
+import { CustomerEMailS } from '#validators/customer'
 
 export const validator = vine.compile(
   vine.object({
@@ -15,8 +16,8 @@ export const validator = vine.compile(
       workspaceId: ULIDS(),
     }),
 
-    email: vine.string().email(),
-    role: WorkspaceMemberRoleS().optional(),
+    email: CustomerEMailS(),
+    role: WorkspaceMemberUpdatableRoleS().optional(),
   })
 )
 
@@ -60,7 +61,7 @@ export default class Controller {
       })
     }
 
-    await Workspace.cacher.activeMembers({ workspace }).expire()
+    await Workspace.cacher.getActiveMembers({ workspace }).expire()
 
     return { message: 'The user has been successfully added to the workspace.' }
   }

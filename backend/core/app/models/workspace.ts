@@ -11,6 +11,7 @@ import cache from '@adonisjs/cache/services/main'
 import User from './user.js'
 import { WorkspaceMemberRoleT } from '#types/literals'
 import { NotFoundException } from '@localspace/node-lib/exception'
+import { WorkspaceHelper } from '#helper/workspace'
 
 export default class Workspace extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -51,12 +52,16 @@ export default class Workspace extends BaseModel {
     return new WorkspaceTransformer(this)
   }
 
+  get helper() {
+    return new WorkspaceHelper(this)
+  }
+
   static get cacher() {
     return new WorkspaceCacher(Workspace, cache.namespace(this.table))
   }
 
   async getMember(params: { user: User }) {
-    const members = await Workspace.cacher.activeMembers({ workspace: this }).get()
+    const members = await Workspace.cacher.getActiveMembers({ workspace: this }).get()
 
     return members.find((m) => m.userId === params.user.id)
   }

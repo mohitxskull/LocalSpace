@@ -15,6 +15,7 @@ import cache from '@adonisjs/cache/services/main'
 import { UserCacher } from '../cacher/user.js'
 import WorkspaceMember from './workspace_member.js'
 import hash from '@adonisjs/core/services/hash'
+import { UserHelper } from '#helper/user'
 
 export default class User extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -81,6 +82,10 @@ export default class User extends BaseModel {
 
   get transformer() {
     return new UserTransformer(this)
+  }
+
+  get helper() {
+    return new UserHelper(this)
   }
 
   static get cacher() {

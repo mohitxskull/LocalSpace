@@ -9,24 +9,20 @@ import { directionE } from '#types/literals'
 export const input = vine.compile(
   vine
     .object({
-      query: vine
+      page: PageS().optional(),
+      limit: LimitS().optional(),
+      order: vine
         .object({
-          page: PageS().optional(),
-          limit: LimitS().optional(),
-          order: vine
-            .object({
-              field: vine
-                .enum([dbRef.workspace.name, dbRef.workspace.createdAt, dbRef.workspace.updatedAt])
-                .optional(),
-              dir: DirectionS().optional(),
-            })
+          field: vine
+            .enum([dbRef.workspace.name, dbRef.workspace.createdAt, dbRef.workspace.updatedAt])
             .optional(),
+          dir: DirectionS().optional(),
+        })
+        .optional(),
 
-          filter: vine
-            .object({
-              value: FilterValueS().optional(),
-            })
-            .optional(),
+      filter: vine
+        .object({
+          value: FilterValueS().optional(),
         })
         .optional(),
     })
@@ -39,16 +35,23 @@ export default class Controller {
 
     const payload = await ctx.request.validateUsing(input)
 
-    const page = payload?.query?.page || 1
-    const limit = payload?.query?.limit || 10
-    const orderBy = payload?.query?.order?.field || dbRef.workspace.createdAt
-    const orderDir = payload?.query?.order?.dir || directionE('desc')
+    const page = payload?.page || 1
+    const limit = payload?.limit || 10
+    const orderBy = payload?.order?.field || dbRef.workspace.createdAt
+    const orderDir = payload?.order?.dir || directionE('desc')
 
-    const listQuery = Workspace.query().whereHas('members', (query) => {
-      query.where(dbRef.workspaceMember.userId, user.id)
-    })
+    const listQuery = Workspace.query()
+      .whereHas('members', (memberQuery) => {
+        memberQuery
+          .where(dbRef.workspaceMember.userId, user.id)
+          .andWhereNotNull(dbRef.workspaceMember.joinedAt)
+          .andWhereNull(dbRef.workspaceMember.leftAt)
+      })
+      .preload('members', (memberQuery) => {
+        memberQuery.where(dbRef.workspaceMember.userId, user.id).groupLimit(1)
+      })
 
-    const filterValue = payload?.query?.filter?.value
+    const filterValue = payload?.filter?.value
 
     if (filterValue) {
       listQuery.whereRaw(...iLike(dbRef.workspace.name, filterValue))
@@ -58,9 +61,22 @@ export default class Controller {
 
     const workspaces = await listQuery.paginate(page, limit)
 
-    return await serializePage(
-      workspaces,
-      async (workspace) => await workspace.transformer.serialize()
-    )
+    return await serializePage(workspaces, async (workspace) => {
+      const workspaceMember = workspace.members.pop()
+
+      if (!workspaceMember) {
+        throw new Error('Workspace member not found', {
+          cause: {
+            workspaceId: workspace.id,
+            userId: user.id,
+          },
+        })
+      }
+
+      const serializedMember = await workspaceMember.transformer.serialize()
+      const serializedWorkspace = await workspace.transformer.serialize()
+
+      return { ...serializedWorkspace, member: serializedMember }
+    })
   }
 }

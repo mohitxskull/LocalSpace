@@ -23,16 +23,19 @@ export const customerWorkspaceRoutes = () => {
               router.post('', [
                 () => import('#controllers/customer/workspace/member/create_controller'),
               ])
-              router.put(':memberId', [
-                () => import('#controllers/customer/workspace/member/update_controller'),
-              ])
-              router.delete(':memberId', [
-                () => import('#controllers/customer/workspace/member/delete_controller'),
-              ])
+
+              router
+                .group(() => {
+                  router.put('', [
+                    () => import('#controllers/customer/workspace/member/update_controller'),
+                  ])
+                  router.delete('', [
+                    () => import('#controllers/customer/workspace/member/delete_controller'),
+                  ])
+                })
+                .prefix(':memberId')
             })
             .prefix('member')
-
-          blogRoutes()
 
           router
             .group(() => {
@@ -44,6 +47,8 @@ export const customerWorkspaceRoutes = () => {
               ])
             })
             .prefix('profile')
+
+          blogRoutes()
         })
         .prefix(':workspaceId')
     })

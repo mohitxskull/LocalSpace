@@ -43,7 +43,7 @@ export default class Controller {
 
     await memberToRemove.save()
 
-    await Workspace.cacher.activeMembers({ workspace }).expire()
+    await Workspace.cacher.getActiveMembers({ workspace }).expire()
 
     return { message: 'The member has been removed from the workspace.' }
   }

@@ -5,7 +5,6 @@ import vine from '@vinejs/vine'
 import db from '@adonisjs/lucid/services/db'
 import { ForbiddenException } from '@localspace/node-lib/exception'
 import { setting } from '#config/setting'
-import { dbRef } from '#database/reference'
 import { WorkspaceNameS } from '#validators/workspace'
 
 export const input = vine.compile(
@@ -20,12 +19,7 @@ export default class Controller {
 
     const payload = await ctx.request.validateUsing(input)
 
-    const ownedWorkspacesCount = await user
-      .related('workspaceMember')
-      .query()
-      .andWhere(dbRef.workspaceMember.role, workspaceMemberRoleE('owner'))
-      .count('*', 'total')
-      .then((result) => result.pop()!.total)
+    const ownedWorkspacesCount = await user.helper.getOwnedWorkspaceCount()
 
     if (ownedWorkspacesCount >= setting.customer.workspace.max) {
       throw new ForbiddenException('You have reached the maximum number of workspaces you can own.')

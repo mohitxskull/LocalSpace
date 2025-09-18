@@ -22,12 +22,8 @@ export default class Controller {
 
     await ctx.bouncer.with('WorkspacePolicy').authorize('view', workspace)
 
-    const member = await workspace
-      .related('members')
-      .query()
+    const member = await workspace.helper.activeMemberQuery
       .where(dbRef.workspaceMember.userId, user.id)
-      .andWhereNotNull(dbRef.workspaceMember.joinedAt)
-      .andWhereNull(dbRef.workspaceMember.leftAt)
       .firstOrFail()
 
     return {
