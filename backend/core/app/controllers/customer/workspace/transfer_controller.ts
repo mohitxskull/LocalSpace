@@ -55,7 +55,7 @@ export default class Controller {
         .andWhere(dbRef.workspaceMember.userId, user.id)
         .firstOrFail()
 
-      oldOwner.role = workspaceMemberRoleE('member')
+      oldOwner.role = workspaceMemberRoleE('manager')
       await oldOwner.save()
 
       newOwner.useTransaction(trx)
@@ -65,7 +65,7 @@ export default class Controller {
 
       await trx.commit()
 
-      await Workspace.cacher.members({ workspace }).expire()
+      await Workspace.cacher.activeMembers({ workspace }).expire()
 
       return {
         message: i18n.t('customer.workspace.transfer.success'),

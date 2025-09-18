@@ -58,6 +58,18 @@
       "destroy": {
         "success": "Member removed successfully.",
         "cannot_remove_self": "You cannot remove yourself from the workspace."
+      },
+      "update": {
+        "success": "Member role updated successfully.",
+        "cannot_update_self": "You cannot update your own role.",
+        "cannot_change_owner_role": "The owner's role cannot be changed.",
+        "cannot_promote_to_owner": "Ownership can only be transferred, not assigned."
+      }
+    },
+    "profile": {
+      "leave": {
+        "success": "You have left the workspace.",
+        "cannot_leave_as_owner": "Owners cannot leave a workspace. Transfer ownership or delete the workspace instead."
       }
     },
     "permission": {

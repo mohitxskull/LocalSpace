@@ -27,9 +27,6 @@ export default class WorkspaceMember extends BaseModel {
   declare role: WorkspaceMemberRoleT
 
   @column.dateTime()
-  declare invitedAt: DateTime<true> | null
-
-  @column.dateTime()
   declare joinedAt: DateTime<true> | null
 
   @column.dateTime()
@@ -57,6 +54,8 @@ export default class WorkspaceMember extends BaseModel {
   declare workspace: BelongsTo<typeof Workspace>
 
   // Extra =============================
+
+  declare total: number
 
   get transformer() {
     return new WorkspaceMemberTransformer(this)

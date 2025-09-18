@@ -20,10 +20,6 @@ export const blogRoutes = () => {
           router.post('unpublish', [
             () => import('#controllers/customer/workspace/blog/unpublish_controller'),
           ])
-
-          router.put('permission/:memberId', [
-            () => import('#controllers/customer/workspace/blog/permission/update_controller'),
-          ])
         })
         .prefix(':blogId')
     })

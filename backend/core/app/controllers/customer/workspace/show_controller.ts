@@ -12,12 +12,12 @@ export const input = vine.compile(
 )
 
 export default class Controller {
-  async handle({ bouncer, request }: HttpContext) {
-    const payload = await request.validateUsing(input)
+  async handle(ctx: HttpContext) {
+    const payload = await ctx.request.validateUsing(input)
 
     const workspace = await Workspace.findOrFail(payload.params.workspaceId)
 
-    await bouncer.with('WorkspacePolicy').authorize('view', workspace)
+    await ctx.bouncer.with('WorkspacePolicy').authorize('view', workspace)
 
     return {
       workspace: await workspace.transformer.serialize(),

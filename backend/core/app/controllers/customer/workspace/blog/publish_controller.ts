@@ -3,6 +3,7 @@ import Blog from '#models/blog'
 import { blogStatusE } from '#types/literals'
 import vine from '@vinejs/vine'
 import { ULIDS } from '#validators/index'
+import Workspace from '#models/workspace'
 
 export const validator = vine.compile(
   vine.object({
@@ -13,13 +14,15 @@ export const validator = vine.compile(
   })
 )
 
-export default class PublishController {
-  async handle({ bouncer, request }: HttpContext) {
-    const { params } = await request.validateUsing(validator)
-    const blog = await Blog.findOrFail(params.blogId)
-    await bouncer.with('BlogPolicy').authorize('publish', blog)
+export default class Controller {
+  async handle(ctx: HttpContext) {
+    const payload = await ctx.request.validateUsing(validator)
+    const workspace = await Workspace.findOrFail(payload.params.workspaceId)
+    const blog = await Blog.findOrFail(payload.params.blogId)
+    await ctx.bouncer.with('BlogPolicy').authorize('publish', workspace, blog)
 
     blog.status = blogStatusE('published')
+
     await blog.save()
 
     return {

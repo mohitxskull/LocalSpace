@@ -8,7 +8,6 @@ export class WorkspaceMemberTransformer extends BaseTransformer<WorkspaceMember>
       userId: this.resource.userId,
       workspaceId: this.resource.workspaceId,
       role: this.resource.role,
-      invitedAt: this.datetime(this.resource.invitedAt),
       joinedAt: this.datetime(this.resource.joinedAt),
       leftAt: this.datetime(this.resource.leftAt),
       createdAt: this.datetime(this.resource.createdAt),

@@ -1,57 +1,45 @@
 import User from '#models/user'
 import Workspace from '#models/workspace'
-import { workspaceMemberRoleE } from '#types/literals'
-import riManager from '#services/ri_service'
 import Blog from '#models/blog'
 import { AuthorizerResponse } from '@adonisjs/bouncer/types'
 
 export default class BlogPolicy {
-  private async isOwner(user: User, workspace: Workspace): Promise<boolean> {
-    const members = await Workspace.cacher.members({ workspace }).get()
-    const member = members.find((m) => m.userId === user.id)
-
-    if (!member) return false
-
-    return member.role === workspaceMemberRoleE('owner')
+  private checkWorkspace(workspace: Workspace, blog: Blog) {
+    if (workspace.id !== blog.workspaceId) {
+      throw new Error('Workspace mismatch', {
+        cause: {
+          workspaceId: workspace.id,
+          blogWorkspaceId: blog.workspaceId,
+        },
+      })
+    }
   }
 
   async create(user: User, workspace: Workspace): Promise<AuthorizerResponse> {
-    return this.isOwner(user, workspace)
+    return await workspace.memberHasRole({ user, roles: ['owner', 'manager', 'editor'] })
   }
 
-  async view(user: User, blog: Blog): Promise<AuthorizerResponse> {
-    await blog.load('workspace')
-    const isOwner = await this.isOwner(user, blog.workspace)
-    if (isOwner) return true
+  async view(user: User, workspace: Workspace, blog: Blog): Promise<AuthorizerResponse> {
+    this.checkWorkspace(workspace, blog)
 
-    const ri = riManager.build().workspace(blog.workspaceId).blog(blog.id).toString()
-    return user.hasPermission({ riPattern: ri, actions: ['read'] })
+    return await workspace.memberHasRole({ user, roles: ['owner', 'manager', 'editor'] })
   }
 
-  async update(user: User, blog: Blog): Promise<AuthorizerResponse> {
-    await blog.load('workspace')
-    const isOwner = await this.isOwner(user, blog.workspace)
-    if (isOwner) return true
+  async update(user: User, workspace: Workspace, blog: Blog): Promise<AuthorizerResponse> {
+    this.checkWorkspace(workspace, blog)
 
-    const ri = riManager.build().workspace(blog.workspaceId).blog(blog.id).toString()
-    return user.hasPermission({ riPattern: ri, actions: ['update'] })
+    return await workspace.memberHasRole({ user, roles: ['owner', 'manager', 'editor'] })
   }
 
-  async delete(user: User, blog: Blog): Promise<AuthorizerResponse> {
-    await blog.load('workspace')
-    const isOwner = await this.isOwner(user, blog.workspace)
-    if (isOwner) return true
+  async delete(user: User, workspace: Workspace, blog: Blog): Promise<AuthorizerResponse> {
+    this.checkWorkspace(workspace, blog)
 
-    const ri = riManager.build().workspace(blog.workspaceId).blog(blog.id).toString()
-    return user.hasPermission({ riPattern: ri, actions: ['delete'] })
+    return await workspace.memberHasRole({ user, roles: ['owner', 'manager', 'editor'] })
   }
 
-  async publish(user: User, blog: Blog): Promise<AuthorizerResponse> {
-    await blog.load('workspace')
-    const isOwner = await this.isOwner(user, blog.workspace)
-    if (isOwner) return true
+  async publish(user: User, workspace: Workspace, blog: Blog): Promise<AuthorizerResponse> {
+    this.checkWorkspace(workspace, blog)
 
-    const ri = riManager.build().workspace(blog.workspaceId).blog(blog.id).toString()
-    return user.hasPermission({ riPattern: ri, actions: ['publish'] })
+    return await workspace.memberHasRole({ user, roles: ['owner', 'manager'] })
   }
 }

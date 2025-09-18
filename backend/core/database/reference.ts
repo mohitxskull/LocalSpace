@@ -30,7 +30,6 @@ const dbStructure = {
       userId: 'user_id',
       workspaceId: 'workspace_id',
       role: 'role',
-      invitedAt: 'invited_at',
       joinedAt: 'joined_at',
       leftAt: 'left_at',
       createdAt: 'created_at',

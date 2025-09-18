@@ -14,7 +14,6 @@ export default class Controller {
     return {
       message: 'pong',
       ip: ctx.request.ip(),
-
       name: payload?.name ?? 'Anonymous',
     }
   }

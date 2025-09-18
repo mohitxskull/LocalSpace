@@ -15,12 +15,12 @@ export const validator = vine.compile(
 )
 
 export default class UpdateController {
-  async handle({ bouncer, request }: HttpContext) {
-    const payload = await request.validateUsing(validator)
+  async handle(ctx: HttpContext) {
+    const payload = await ctx.request.validateUsing(validator)
 
     const workspace = await Workspace.findOrFail(payload.params.workspaceId)
 
-    await bouncer.with('WorkspacePolicy').authorize('update', workspace)
+    await ctx.bouncer.with('WorkspacePolicy').authorize('update', workspace)
 
     if (payload.name) {
       workspace.name = payload.name

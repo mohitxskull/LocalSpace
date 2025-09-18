@@ -34,10 +34,10 @@ export const input = vine.compile(
 )
 
 export default class Controller {
-  async handle({ request, auth }: HttpContext) {
-    const user = auth.getUserOrFail()
+  async handle(ctx: HttpContext) {
+    const user = ctx.auth.getUserOrFail()
 
-    const payload = await request.validateUsing(input)
+    const payload = await ctx.request.validateUsing(input)
 
     const page = payload?.query?.page || 1
     const limit = payload?.query?.limit || 10

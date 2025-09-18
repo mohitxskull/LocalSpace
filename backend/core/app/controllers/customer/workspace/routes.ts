@@ -21,30 +21,29 @@ export const customerWorkspaceRoutes = () => {
           router
             .group(() => {
               router.post('', [
-                () => import('#controllers/customer/workspace/member/store_controller'),
+                () => import('#controllers/customer/workspace/member/create_controller'),
+              ])
+              router.put(':memberId', [
+                () => import('#controllers/customer/workspace/member/update_controller'),
               ])
               router.delete(':memberId', [
-                () => import('#controllers/customer/workspace/member/destroy_controller'),
+                () => import('#controllers/customer/workspace/member/delete_controller'),
               ])
             })
             .prefix('member')
 
-          router
-            .group(() => {
-              router.get(':memberId', [
-                () => import('#controllers/customer/workspace/permission/show_controller'),
-              ])
-              router.put(':memberId', [
-                () => import('#controllers/customer/workspace/permission/update_controller'),
-              ])
-            })
-            .prefix('permission')
-
           blogRoutes()
 
-          router.get('profile', [
-            () => import('#controllers/customer/workspace/profile/show_controller'),
-          ])
+          router
+            .group(() => {
+              router.get('', [
+                () => import('#controllers/customer/workspace/profile/show_controller'),
+              ])
+              router.post('leave', [
+                () => import('#controllers/customer/workspace/profile/leave_controller'),
+              ])
+            })
+            .prefix('profile')
         })
         .prefix(':workspaceId')
     })

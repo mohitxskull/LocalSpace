@@ -57,6 +57,8 @@ export default class Blog extends BaseModel {
 
   // Extra =============================
 
+  declare total: number
+
   get transformer() {
     return new BlogTransformer(this)
   }

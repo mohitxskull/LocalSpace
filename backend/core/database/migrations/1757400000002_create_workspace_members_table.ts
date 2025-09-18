@@ -21,7 +21,6 @@ export default class extends BaseSchema {
 
       t.string(dbRef.workspaceMember.role).notNullable()
 
-      t.timestamp(dbRef.workspaceMember.invitedAt).nullable()
       t.timestamp(dbRef.workspaceMember.joinedAt).nullable()
       t.timestamp(dbRef.workspaceMember.leftAt).nullable()
 

@@ -10,6 +10,10 @@ export const setting = {
 
     workspace: {
       max: 5,
+
+      blog: {
+        max: 20,
+      },
     },
   },
 
