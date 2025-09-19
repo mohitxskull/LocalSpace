@@ -9,4 +9,5 @@ export const customerRoutes = () => {
       customerWorkspaceRoutes()
     })
     .prefix('customer')
+    .as('customer')
 }

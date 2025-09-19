@@ -1,24 +1,49 @@
 import "@mantine/core/styles.css";
 import "@mantine/nprogress/styles.css";
 import "@mantine/notifications/styles.css";
+import "@/styles/global.css";
 
 import type { AppProps } from "next/app";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "@/config/theme";
 import { NavigationProgress } from "@mantine/nprogress";
-import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Notifications } from "@mantine/notifications";
 import { NuqsAdapter } from "nuqs/adapters/next/pages";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { NextSeo } from "next-seo";
-import { setting } from "@/config/setting";
 import { useRouter } from "next/router";
+import { setting } from "@localspace/ui/configs/setting";
+import { frontendUrl } from "@/lib";
+import { client, TuyauProvider } from "@/lib/tuyau";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const makeQueryClient = () => {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+        retry: false,
+      },
+    },
+  });
+};
+
+let browserQueryClient: QueryClient | undefined = undefined;
+
+const getQueryClient = () => {
+  if (typeof window === "undefined") {
+    // Server: always make a new query client
+    return makeQueryClient();
+  } else {
+    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    return browserQueryClient;
+  }
+};
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
-  const [queryClient] = useState(() => new QueryClient());
+  const queryClient = getQueryClient();
 
   return (
     <>
@@ -32,18 +57,18 @@ export default function App({ Component, pageProps }: AppProps) {
           site_name: setting.app.name,
           images: [
             {
-              url: setting.app.banner,
+              url: frontendUrl("/banner.png").toString(),
             },
           ],
         }}
         additionalLinkTags={[
           {
             rel: "icon",
-            href: setting.app.logo,
+            href: frontendUrl("/logo.png").toString(),
           },
           {
             rel: "manifest",
-            href: setting.app.manifest,
+            href: frontendUrl("/manifest.json").toString(),
           },
         ]}
         additionalMetaTags={[
@@ -57,13 +82,15 @@ export default function App({ Component, pageProps }: AppProps) {
       <GoogleTagManager gtmId="GTM-XYZ" />
 
       <QueryClientProvider client={queryClient}>
-        <MantineProvider theme={theme}>
-          <NuqsAdapter>
-            <NavigationProgress />
-            <Notifications />
-            <Component {...pageProps} />
-          </NuqsAdapter>
-        </MantineProvider>
+        <TuyauProvider client={client} queryClient={queryClient}>
+          <MantineProvider theme={theme}>
+            <NuqsAdapter>
+              <NavigationProgress />
+              <Notifications />
+              <Component {...pageProps} />
+            </NuqsAdapter>
+          </MantineProvider>
+        </TuyauProvider>
       </QueryClientProvider>
     </>
   );

@@ -1,6 +1,17 @@
 import { createTheme, virtualColor } from "@mantine/core";
+import { FONTS } from "./font";
 
 export const theme = createTheme({
+  fontFamily: FONTS.GEIST,
+  fontFamilyMonospace: FONTS.GEIST_MONO,
+
+  headings: {
+    fontFamily: FONTS.GEIST,
+  },
+
+  autoContrast: true,
+  cursorType: "pointer",
+
   defaultRadius: "0.5rem",
   white: "#faf9f5",
   black: "#3d3929",

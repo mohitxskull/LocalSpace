@@ -19,8 +19,5 @@ export default class ContainerBindingsMiddleware {
 }
 
 declare module '@adonisjs/core/http' {
-  export interface HttpContext {
-    deviceId: string
-    isNewDevice: boolean
-  }
+  export interface HttpContext {}
 }

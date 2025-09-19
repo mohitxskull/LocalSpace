@@ -19,10 +19,12 @@ router
           .group(() => {
             customerRoutes()
 
-            router.get('ping', [() => import('#controllers/ping_controller')])
+            router.get('ping', [() => import('#controllers/ping_controller')]).as('ping')
           })
           .prefix('v1')
+          .as('v1')
       })
       .prefix('api')
+      .as('api')
   })
   .use([userLimiter])

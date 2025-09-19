@@ -193,8 +193,11 @@ importers:
         specifier: ^5.85.9
         version: 5.85.9(react@19.1.0)
       '@tuyau/client':
-        specifier: ^0.2.10
-        version: 0.2.10
+        specifier: 0.2.11-next.2
+        version: 0.2.11-next.2
+      '@tuyau/react-query':
+        specifier: 0.0.1-next.2
+        version: 0.0.1-next.2(@tanstack/react-query@5.85.9(react@19.1.0))(@tuyau/client@0.2.11-next.2)
       dayjs:
         specifier: ^1.11.18
         version: 1.11.18
@@ -347,11 +350,29 @@ importers:
 
   packages/ui:
     dependencies:
+      '@mantine/core':
+        specifier: 8.*
+        version: 8.2.8(@mantine/hooks@8.2.8(react@19.1.0))(@types/react@19.1.12)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@mantine/form':
+        specifier: 8.*
+        version: 8.2.8(react@19.1.0)
+      '@marsidev/react-turnstile':
+        specifier: ^1.3.0
+        version: 1.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@tanstack/react-query':
+        specifier: 5.*
+        version: 5.85.9(react@19.1.0)
+      cookies-next:
+        specifier: ^6.1.0
+        version: 6.1.0(next@15.5.2(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+      next:
+        specifier: 15.*
+        version: 15.5.2(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
-        specifier: 19.1.0
+        specifier: 19.*
         version: 19.1.0
       react-dom:
-        specifier: 19.1.0
+        specifier: 19.*
         version: 19.1.0(react@19.1.0)
     devDependencies:
       '@adonisjs/eslint-config':
@@ -389,7 +410,7 @@ importers:
         version: 15.5.2(eslint@9.34.0)(typescript@5.8.3)
       eslint-plugin-import:
         specifier: ^2.32.0
-        version: 2.32.0(eslint@9.34.0)
+        version: 2.32.0(@typescript-eslint/parser@8.41.0(eslint@9.34.0)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.34.0)
       prettier:
         specifier: ^3.5.3
         version: 3.6.2
@@ -2606,14 +2627,20 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@tuyau/client@0.2.10':
-    resolution: {integrity: sha512-sVp4JX9uvvV3BSPgZNogJWYp0oleqi2Zy0gyBLFjFz6KWtTVPqNKBA74n0UsnaeZB8y3xxXkYSeWf19z+7yhmg==}
+  '@tuyau/client@0.2.11-next.2':
+    resolution: {integrity: sha512-sTwa/QVFnTHh/NtFmMknPi4ckoOc+ztcTByu8gwUPBuTjaP282g4vymRLaE/GQLRgeRvnF56obs6m/ibqeRd6w==}
 
   '@tuyau/core@0.4.2':
     resolution: {integrity: sha512-thobRIBW+fQGt9gXQ9zdvhVUyZE5qLZorBeDqxJ2SF07igZAqm0+fyvMTQbOH/vIcpwK2ob9ev3bBhqW4E2hWw==}
     engines: {node: '>=20.6.0'}
     peerDependencies:
       '@adonisjs/core': ^6.2.0
+
+  '@tuyau/react-query@0.0.1-next.2':
+    resolution: {integrity: sha512-kBQrmuerzSDlAD0+NvpZ8qmk1cPC0Epxle7lCyUI8eSpm97/y776q+qT8Q/l1cqPGmh7uqzPAgPFewWOWgiSgA==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.74.7
+      '@tuyau/client': ^0.2.11-next.0
 
   '@tuyau/utils@0.0.9':
     resolution: {integrity: sha512-Uirv4CH7d7US5atdKda3mPmg2K0PsYQx2Gab7Xe/PSGdlq/fp4Ia1IWYKRL2Lfx36QAzEuHqrk4WmDxmw1sTVw==}
@@ -3294,6 +3321,12 @@ packages:
 
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
+
+  cookies-next@6.1.0:
+    resolution: {integrity: sha512-8MqWliHg6YRatqlup5HlKCqXM5cFtwq9BVowDpPniPfbTOmrfIEXUQOcRFVXQltV+hyvKDRGJPNtceICkiJ/IA==}
+    peerDependencies:
+      next: '>=15.0.0'
+      react: '>= 16.8.0'
 
   copy-file@11.1.0:
     resolution: {integrity: sha512-X8XDzyvYaA6msMyAM575CUoygY5b44QzLcGRKsK3MFmXcOvQa518dNPLsKYwkYsn72g3EiW+LE0ytd/FlqWmyw==}
@@ -9248,7 +9281,7 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@tuyau/client@0.2.10':
+  '@tuyau/client@0.2.11-next.2':
     dependencies:
       '@tuyau/utils': 0.0.9
       ky: 1.9.1
@@ -9259,6 +9292,12 @@ snapshots:
       '@adonisjs/core': 6.19.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(edge.js@6.3.0)
       '@tuyau/utils': 0.0.9
       ts-morph: 26.0.0
+
+  '@tuyau/react-query@0.0.1-next.2(@tanstack/react-query@5.85.9(react@19.1.0))(@tuyau/client@0.2.11-next.2)':
+    dependencies:
+      '@tanstack/react-query': 5.85.9(react@19.1.0)
+      '@tuyau/client': 0.2.11-next.2
+      '@tuyau/utils': 0.0.9
 
   '@tuyau/utils@0.0.9': {}
 
@@ -9938,6 +9977,12 @@ snapshots:
 
   cookiejar@2.1.4: {}
 
+  cookies-next@6.1.0(next@15.5.2(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
+    dependencies:
+      cookie: 1.0.2
+      next: 15.5.2(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+
   copy-file@11.1.0:
     dependencies:
       graceful-fs: 4.2.11
@@ -10396,33 +10441,6 @@ snapshots:
       tsconfig-paths: 3.15.0
     optionalDependencies:
       '@typescript-eslint/parser': 8.41.0(eslint@9.34.0)(typescript@5.8.3)
-    transitivePeerDependencies:
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - supports-color
-
-  eslint-plugin-import@2.32.0(eslint@9.34.0):
-    dependencies:
-      '@rtsao/scc': 1.1.0
-      array-includes: 3.1.9
-      array.prototype.findlastindex: 1.2.6
-      array.prototype.flat: 1.3.3
-      array.prototype.flatmap: 1.3.3
-      debug: 3.2.7
-      doctrine: 2.1.0
-      eslint: 9.34.0
-      eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.41.0(eslint@9.34.0)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.34.0)
-      hasown: 2.0.2
-      is-core-module: 2.16.1
-      is-glob: 4.0.3
-      minimatch: 3.1.2
-      object.fromentries: 2.0.8
-      object.groupby: 1.0.3
-      object.values: 1.2.1
-      semver: 6.3.1
-      string.prototype.trimend: 1.0.9
-      tsconfig-paths: 3.15.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack

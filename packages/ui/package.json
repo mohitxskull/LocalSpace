@@ -10,7 +10,9 @@
     "!build/bin"
   ],
   "exports": {
-    ".": "./build/index.js"
+    "./components/*": "./build/src/components/*.js",
+    "./configs/*": "./build/src/configs/*.js",
+    "./lib/*": "./build/src/lib/*.js"
   },
   "scripts": {
     "clean": "del-cli build",
@@ -38,8 +40,16 @@
     "prettier": "^3.5.3",
     "typescript": "^5"
   },
+  "peerDependencies": {
+    "@mantine/core": "8.*",
+    "@mantine/form": "8.*",
+    "@tanstack/react-query": "5.*",
+    "next": "15.*",
+    "react": "19.*",
+    "react-dom": "19.*"
+  },
   "dependencies": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "@marsidev/react-turnstile": "^1.3.0",
+    "cookies-next": "^6.1.0"
   }
 }
