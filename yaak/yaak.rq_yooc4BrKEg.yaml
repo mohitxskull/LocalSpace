@@ -25,5 +25,5 @@ headers:
 method: POST
 name: Sign Up
 sortPriority: 0.0
-url: ${[ BASE ]}/customer/auth/sign-up
+url: ${[ BASE ]}/customer/auth/signup
 urlParameters: []

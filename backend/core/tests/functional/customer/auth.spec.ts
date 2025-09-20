@@ -29,7 +29,7 @@ test.group('Customer auth', (group) => {
 
     const { mails } = mail.fake()
 
-    const response = await client.post('/api/v1/customer/auth/sign-up').json({
+    const response = await client.post('/api/v1/customer/auth/signup').json({
       name,
       email: userEmail,
       password,
@@ -72,7 +72,7 @@ test.group('Customer auth', (group) => {
 
     await UserFactory.merge({ email: userEmail }).create()
 
-    const response = await client.post('/api/v1/customer/auth/sign-up').json({
+    const response = await client.post('/api/v1/customer/auth/signup').json({
       name: 'test',
       email: userEmail,
       password: 'password',
@@ -96,7 +96,7 @@ test.group('Customer auth', (group) => {
       verifiedAt: DateTime.now(),
     }).create()
 
-    const response = await client.post('/api/v1/customer/auth/sign-in').json({
+    const response = await client.post('/api/v1/customer/auth/signin').json({
       email: userEmail,
       password: password,
     })
@@ -121,7 +121,7 @@ test.group('Customer auth', (group) => {
       verifiedAt: DateTime.now(),
     }).create()
 
-    const response = await client.post('/api/v1/customer/auth/sign-in').json({
+    const response = await client.post('/api/v1/customer/auth/signin').json({
       email: userEmail,
       password: 'wrong-password',
     })
@@ -139,7 +139,7 @@ test.group('Customer auth', (group) => {
 
     await UserFactory.merge({ email: userEmail, password: password }).create()
 
-    const response = await client.post('/api/v1/customer/auth/sign-in').json({
+    const response = await client.post('/api/v1/customer/auth/signin').json({
       email: userEmail,
       password: password,
     })
@@ -237,7 +237,7 @@ test.group('Customer auth', (group) => {
   test('should not allow sign up if disabled', async ({ client }) => {
     app.config.set('setting.customer.signUp.active', false)
 
-    const response = await client.post('/api/v1/customer/auth/sign-up').json({
+    const response = await client.post('/api/v1/customer/auth/signup').json({
       name: 'test',
       email: 'test@gmail.com',
       password: 'password',
@@ -245,22 +245,22 @@ test.group('Customer auth', (group) => {
     })
 
     response.assertStatus(403)
-    response.assertBodyContains({ message: 'Sign-up is currently disabled.' })
+    response.assertBodyContains({ message: 'signup is currently disabled.' })
   })
 
-  test('should not sign in if sign-in is disabled', async ({ client }) => {
+  test('should not sign in if signin is disabled', async ({ client }) => {
     app.config.set('setting.customer.signIn.active', false)
 
-    const response = await client.post('/api/v1/customer/auth/sign-in').json({
+    const response = await client.post('/api/v1/customer/auth/signin').json({
       email: 'test@gmail.com',
       password: 'password',
     })
 
     response.assertStatus(403)
-    response.assertBodyContains({ message: 'Sign-in is currently disabled.' })
+    response.assertBodyContains({ message: 'signin is currently disabled.' })
   })
 
-  test('should rate limit sign-in attempts', async ({ client }) => {
+  test('should rate limit signin attempts', async ({ client }) => {
     const userEmail = 'rate-limit@gmail.com'
     const password = 'password'
 
@@ -273,7 +273,7 @@ test.group('Customer auth', (group) => {
     const promises = []
     for (let i = 0; i < 6; i++) {
       promises.push(
-        client.post('/api/v1/customer/auth/sign-in').json({
+        client.post('/api/v1/customer/auth/signin').json({
           email: userEmail,
           password: 'wrong-password',
         })
@@ -297,15 +297,15 @@ test.group('Customer auth', (group) => {
     }).create()
 
     // Log in 3 times
-    await client.post('/api/v1/customer/auth/sign-in').json({
+    await client.post('/api/v1/customer/auth/signin').json({
       email: userEmail,
       password: password,
     })
-    await client.post('/api/v1/customer/auth/sign-in').json({
+    await client.post('/api/v1/customer/auth/signin').json({
       email: userEmail,
       password: password,
     })
-    await client.post('/api/v1/customer/auth/sign-in').json({
+    await client.post('/api/v1/customer/auth/signin').json({
       email: userEmail,
       password: password,
     })

@@ -106,7 +106,7 @@ export default class TokenModule {
         [dbRef.token.typeC]: params.type,
         [dbRef.token.nameC]: params.name,
         [dbRef.token.hashC]: transientToken.hash,
-        [dbRef.token.abilitiesC]: '',
+        [dbRef.token.abilitiesC]: JSON.stringify([]),
         [dbRef.token.expiresAtC]: dateTimeExpiresAt,
       },
       {

@@ -23,5 +23,5 @@ headers:
 method: POST
 name: Sign In
 sortPriority: 0.001
-url: ${[ BASE ]}/customer/auth/sign-in
+url: ${[ BASE ]}/customer/auth/signin
 urlParameters: []

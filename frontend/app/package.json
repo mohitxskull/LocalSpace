@@ -8,7 +8,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "check": "nr format && nr typecheck && nr lint"
+    "check": "nr format && nr typecheck && nr lint",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@localspace/backend-core": "workspace:*",
@@ -26,6 +27,7 @@
     "@tuyau/client": "0.2.11-next.2",
     "@tuyau/react-query": "0.0.1-next.2",
     "dayjs": "^1.11.18",
+    "dot-prop": "^10.0.0",
     "next": "15.5.2",
     "next-seo": "^6.8.0",
     "nuqs": "^2.5.2",
@@ -35,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.55.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

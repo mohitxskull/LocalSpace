@@ -4,7 +4,7 @@ import { defineConfig, transports } from '@adonisjs/mail'
 const mailConfig = defineConfig({
   default: 'smtp',
 
-  from: 'onboarding@resend.dev',
+  from: 'localspace@mail.mohitxskull.com',
 
   /**
    * The mailers object can be used to configure multiple mailers

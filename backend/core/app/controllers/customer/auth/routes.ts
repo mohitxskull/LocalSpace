@@ -5,12 +5,12 @@ export const customerAuthRoutes = () => {
   router
     .group(() => {
       router
-        .post('signin', [() => import('#controllers/customer/auth/sign_in_controller')])
+        .post('signin', [() => import('#controllers/customer/auth/signin_controller')])
         .use([middleware.captcha()])
         .as('signin')
 
       router
-        .post('signup', [() => import('#controllers/customer/auth/sign_up_controller')])
+        .post('signup', [() => import('#controllers/customer/auth/signup_controller')])
         .use([middleware.captcha()])
         .as('signup')
 

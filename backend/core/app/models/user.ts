@@ -76,6 +76,7 @@ export default class User extends BaseModel {
     type: tokenTypeE('access'),
     table: dbRef.token.table.name,
     tokenSecretLength: 42,
+    prefix: 'at_',
   })
 
   declare currentAccessToken: AccessTokenHolderOriginal

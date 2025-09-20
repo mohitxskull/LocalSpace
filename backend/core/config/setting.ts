@@ -33,7 +33,7 @@ export default {
       },
       passwordReset: {
         expiresIn: '15m',
-        path: '/reset-password',
+        path: '/password/reset',
       },
     },
   },

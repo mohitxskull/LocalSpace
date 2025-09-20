@@ -23,7 +23,7 @@ export default class Controller {
   async handle(ctx: HttpContext) {
     const setting = getSetting()
     if (!setting.customer.signIn.active) {
-      throw new ForbiddenException('Sign-in is currently disabled.')
+      throw new ForbiddenException('signin is currently disabled.')
     }
 
     const payload = await ctx.request.validateUsing(input)

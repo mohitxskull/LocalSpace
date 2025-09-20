@@ -29,8 +29,6 @@ export default class Controller {
 
     const blogCount = await workspace.helper.getBlogCount()
 
-    console.log('Blog Count: ', blogCount)
-
     if (blogCount >= setting.customer.workspace.blog.max) {
       throw new ForbiddenException(
         'You have reached the maximum number of blogs for this workspace.'
