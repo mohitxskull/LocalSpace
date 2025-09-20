@@ -4,7 +4,7 @@ import { blogRoutes } from './blog/routes.js'
 
 export const customerWorkspaceRoutes = () => {
   router
-    .group(() => {
+    .group(async () => {
       router
         .post('', [() => import('#controllers/customer/workspace/create_controller')])
         .as('create')

@@ -4,7 +4,7 @@ import { customerWorkspaceRoutes } from './workspace/routes.js'
 
 export const customerRoutes = () => {
   router
-    .group(() => {
+    .group(async () => {
       customerAuthRoutes()
       customerWorkspaceRoutes()
     })

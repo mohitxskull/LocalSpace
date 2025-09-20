@@ -18,6 +18,6 @@ export default class ContainerBindingsMiddleware {
   }
 }
 
-declare module '@adonisjs/core/http' {
-  export interface HttpContext {}
-}
+// declare module '@adonisjs/core/http' {
+//   export interface HttpContext {}
+// }

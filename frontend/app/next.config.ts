@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   transpilePackages: ["@localspace/backend-core"],
-  typedRoutes: true, // Now stable!
+  typedRoutes: true,
 };
 
 export default nextConfig;

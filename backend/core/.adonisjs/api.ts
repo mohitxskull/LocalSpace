@@ -254,7 +254,7 @@ const routes = [
   {
     params: [],
     name: 'prometheus.metrics',
-    path: '/metrics',
+    path: '/api/v1/metrics',
     method: ["GET","HEAD"],
     types: {} as unknown,
   },

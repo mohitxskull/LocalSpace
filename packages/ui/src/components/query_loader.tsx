@@ -5,7 +5,7 @@ import React from 'react'
 type RenderProp<T> = React.ReactNode | ((props: T) => React.ReactNode)
 
 // Helper function to resolve the RenderProp
-function renderContent<T>(content: RenderProp<T>, props: T): React.ReactNode {
+const renderContent = <T,>(content: RenderProp<T>, props: T): React.ReactNode => {
   if (typeof content === 'function') {
     return content(props)
   }

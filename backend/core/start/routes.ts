@@ -7,9 +7,9 @@
 |
 */
 
-import { customerRoutes } from '#controllers/customer/routes'
 import router from '@adonisjs/core/services/router'
 import { userLimiter } from './limiter.js'
+import { customerRoutes } from '#controllers/customer/routes'
 
 router
   .group(() => {

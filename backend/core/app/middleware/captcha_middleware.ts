@@ -9,7 +9,7 @@ import vine from '@vinejs/vine'
 const schema = vine.compile(
   vine.object({
     headers: vine.object({
-      token: vine.string().maxLength(2048).minLength(10),
+      captcha: vine.string().maxLength(2048).minLength(10),
     }),
   })
 )
@@ -22,21 +22,21 @@ export default class CaptchaMiddleware {
 
     const payload = await ctx.request.validateUsing(schema)
 
-    if (safeEqual(env.get('APP_ACCESS_KEY'), payload.headers.token)) {
+    if (safeEqual(env.get('APP_ACCESS_KEY'), payload.headers.captcha)) {
       ctx.logger.debug('Bypassed captcha using App Access Key')
 
       return next()
     }
 
     const [isValid] = await captcha.use().verify({
-      token: payload.headers.token,
+      token: payload.headers.captcha,
       ip: ctx.request.ip(),
     })
 
     if (!isValid) {
       throw new BadRequestException('Invalid captcha', {
         reason: {
-          token: payload.headers.token,
+          token: payload.headers.captcha,
         },
       })
     }

@@ -11,7 +11,7 @@ export default defineConfig({
   /**
    * Endpoint where metrics will be exposed
    */
-  endpoint: '/metrics',
+  endpoint: 'api/v1/admin/metrics',
 
   /**
    * A prefix that will be added to all metrics

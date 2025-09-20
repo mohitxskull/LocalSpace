@@ -4,26 +4,32 @@ import {
   Card,
   Center,
   Container,
+  LoadingOverlay,
   PasswordInput,
   Stack,
   Text,
   TextInput,
   Title,
 } from "@mantine/core";
-import { Logo } from "@localspace/ui/components/logo";
-import { Form } from "@localspace/ui/components/form";
+import {
+  Logo,
+  Captcha,
+  Form,
+  LogoLoadingOverlay,
+} from "@localspace/ui/components";
 import { useFormMutation } from "@/lib/hooks/use_form_mutation";
 import { useTuyau } from "@/lib/tuyau";
 import Link from "next/link";
-import { Captcha } from "@localspace/ui/components/captcha";
 import { env } from "@/config/env";
 import { notifications } from "@mantine/notifications";
 import { cookieManager } from "@/lib/cookie_manager";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 export default function Page() {
   const session = useSession();
   const tuyau = useTuyau();
+  const router = useRouter();
 
   const [isCaptchaReady, setIsCaptchaReady] = useState(false);
 
@@ -36,6 +42,14 @@ export default function Page() {
       },
     },
   });
+
+  if (session.isLoading) {
+    return <LogoLoadingOverlay />;
+  }
+
+  if (session.isSuccess) {
+    router.push("/app");
+  }
 
   return (
     <Container size="xs">
@@ -89,7 +103,7 @@ export default function Page() {
 
                   {isDirty && (
                     <Captcha
-                      key={env.NEXT_PUBLIC_CAPTCHA_PUBLIC_KEY}
+                      siteKey={env.NEXT_PUBLIC_CAPTCHA_PUBLIC_KEY}
                       onMessage={(data) => notifications.show(data)}
                       setToken={(t) => {
                         if (t) {

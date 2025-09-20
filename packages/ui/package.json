@@ -10,7 +10,7 @@
     "!build/bin"
   ],
   "exports": {
-    "./components/*": "./build/src/components/*.js",
+    "./components": "./build/src/components/index.js",
     "./configs/*": "./build/src/configs/*.js",
     "./lib/*": "./build/src/lib/*.js"
   },

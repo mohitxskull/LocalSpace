@@ -1,14 +1,14 @@
 import { Turnstile } from '@marsidev/react-turnstile'
 
 export const Captcha = (props: {
-  key: string
+  siteKey: string
   setToken: (token: string | null) => void
   onMessage: (data: { title: string; message: string }) => void
 }) => {
   return (
     <>
       <Turnstile
-        siteKey={props.key}
+        siteKey={props.siteKey}
         onSuccess={(t) => {
           props.setToken(t)
         }}
