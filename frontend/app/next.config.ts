@@ -7,8 +7,6 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   transpilePackages: ["@localspace/backend-core"],
-  basePath: "/app",
-  assetPrefix: "/app-static",
 };
 
 export default nextConfig;

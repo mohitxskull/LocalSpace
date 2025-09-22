@@ -3,7 +3,7 @@ import * as z from "zod";
 
 export const serverEnv = createEnv({
   server: {
-    NODE_ENV: z.enum(["development", "production"]).default("production"),
+    NODE_ENV: z.enum(["development", "production"]).default("development"),
   },
 
   experimental__runtimeEnv: process.env,
