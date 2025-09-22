@@ -17,7 +17,7 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "ace": "node ace",
-    "check": "nr format && nr typecheck && nr lint && nr test"
+    "check": "pnpm format && pnpm typecheck && pnpm lint && pnpm test"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",

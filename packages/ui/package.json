@@ -21,10 +21,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "prebuild": "nr clean",
+    "prebuild": "pnpm clean",
     "build": "tsc && cpy ./src/styles ./build",
     "playground": "tsx bin/playground.ts",
-    "check": "nr format && nr typecheck && nr lint"
+    "check": "pnpm format && pnpm typecheck && pnpm lint"
   },
   "devDependencies": {
     "@adonisjs/eslint-config": "^2.1.2",
