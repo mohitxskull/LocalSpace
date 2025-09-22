@@ -1,0 +1,14 @@
+{
+  "title": "General Lib",
+  "pages": [
+    "index",
+    "---Utilities---",
+    "array_utilities",
+    "dynamic_props",
+    "hash",
+    "interpolate",
+    "object_utilities",
+    "promise_utilities"
+  ],
+  "defaultOpen": true
+}

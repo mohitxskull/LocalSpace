@@ -1,0 +1,40 @@
+{
+  "name": "@localspace/frontend-docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --turbo -p 3002",
+    "start": "next start",
+    "postinstall": "fumadocs-mdx",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,mdx}\"",
+    "lint": "eslint",
+    "check": "pnpm format && pnpm typecheck && pnpm lint"
+  },
+  "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.12",
+    "class-variance-authority": "^0.7.1",
+    "fumadocs-core": "15.7.13",
+    "fumadocs-mdx": "11.10.1",
+    "fumadocs-ui": "15.7.13",
+    "lucide-react": "^0.544.0",
+    "next": "15.5.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "24.3.3",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "eslint": "^9.34.0",
+    "eslint-config-next": "15.5.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "typescript": "5.9.2"
+  }
+}

@@ -1,0 +1,163 @@
+---
+title: DBReference
+description: The DBReference class is a powerful utility for creating a type-safe and centralized reference to your database schema. It allows you to define your tables and columns in one place and then access them throughout your application with full autocompletion and type-checking.
+---
+
+This helps to avoid typos in table and column names, and makes refactoring your database schema much easier.
+
+## Features
+
+- **Type-Safe Schema**: Catch typos and invalid column names at compile time.
+- **Centralized Definition**: Define your database structure in a single, easy-to-manage object.
+- **Autocompletion**: Get full autocompletion for your table and column names in your IDE.
+- **Refactoring Friendly**: Rename a column in one place, and TypeScript will tell you everywhere you need to update it.
+- **Pivot Table Helpers**: Easily define and reuse pivot table configurations for relationships.
+
+## Usage
+
+**1. Define Your Database Structure:**
+
+Create a file (e.g., `database/reference.ts`) to define your database structure using the `DBReference.create` method. It's crucial to use `as const` to ensure TypeScript treats your structure as a literal type.
+
+```typescript
+// database/reference.ts
+
+import { DBReference, TableReference } from "@localspace/node-lib";
+
+const dbStructure = {
+  user: {
+    name: "users",
+    columns: {
+      id: "id",
+      name: "name",
+      role: "role",
+      email: "email",
+      password: "password",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      verifiedAt: "verified_at",
+    },
+  },
+  workspace: {
+    name: "workspaces",
+    columns: {
+      id: "id",
+      name: "name",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    },
+  },
+  workspaceMember: {
+    name: "workspace_members",
+    columns: {
+      id: "id",
+      userId: "user_id",
+      workspaceId: "workspace_id",
+      role: "role",
+      joinedAt: "joined_at",
+      leftAt: "left_at",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    },
+  },
+} as const satisfies TableReference;
+
+export const dbRef = DBReference.create(dbStructure);
+```
+
+**2. Use the Reference in Your Application:**
+
+Now you can import `dbRef` and use it to reference your tables and columns in a type-safe way, preventing typos and making refactoring a breeze.
+
+```typescript
+import { dbRef } from "#database/reference";
+import Workspace from "#models/workspace";
+
+// In a controller or service, listing workspaces for a specific user.
+// This query is much safer and easier to write with dbRef.
+async function listUserWorkspaces(user: User) {
+  const workspaces = await Workspace.query()
+    .whereHas("members", (memberQuery) => {
+      memberQuery
+        .where(dbRef.workspaceMember.userId, user.id)
+        .andWhereNotNull(dbRef.workspaceMember.joinedAt)
+        .andWhereNull(dbRef.workspaceMember.leftAt);
+    })
+    .orderBy(dbRef.workspace.createdAt, "desc");
+
+  return workspaces;
+}
+```
+
+### Column Name Accessors
+
+The `dbRef` object provides multiple ways to access column names:
+
+- **Direct Property**: `dbRef.user.email` -> `'email'` (the column name)
+- **`C` Suffix Property**: `dbRef.user.emailC` -> `'email'` (the key of the column)
+- **`columns` Function**: `dbRef.user.table.columns('email')` -> `'users.email'` (the fully qualified column name)
+
+## Pivot Table Configuration
+
+You can also define pivot table information for many-to-many relationships.
+
+```typescript
+const dbStructure = {
+  user: { ... },
+  role: {
+    name: 'roles',
+    columns: { id: 'id', name: 'name' },
+    pivot: {
+      pivotTable: 'user_roles',
+      localKey: 'id',
+      pivotForeignKey: 'user_id',
+      relatedKey: 'id',
+      pivotRelatedForeignKey: 'role_id',
+      pivotTimestamps: true,
+    },
+  },
+} as const satisfies TableReference;
+
+export const dbRef = DBReference.create(dbStructure);
+```
+
+Then, in your model relationship definition:
+
+```typescript
+// app/models/user.ts
+
+import { manyToMany } from "@adonisjs/lucid/orm";
+import Role from "#models/role";
+import { dbRef } from "#database/reference";
+
+class User extends BaseModel {
+  @manyToMany(() => Role, dbRef.role.table.pivot())
+  declare roles: ManyToMany<typeof Role>;
+}
+```
+
+You can even override pivot options on the fly:
+
+```typescript
+// Override the pivot table name for a specific query
+dbRef.role.table.pivot({ pivotTable: "custom_user_roles" });
+```
+
+## API
+
+### create
+
+`DBReference.create<T extends TableReference>(structure: T): DBReferenceObject<T>`
+
+<TypeTable
+  type={{
+    structure: {
+      description:
+        "The object defining your database schema. Must be declared with `as const`.",
+      type: "T",
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** A deeply-typed object that you can use to access your schema information.

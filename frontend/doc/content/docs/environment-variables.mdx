@@ -1,0 +1,42 @@
+---
+title: Environment Variables
+description: A reference for the environment variables used in the project.
+---
+
+This document provides an overview of the environment variables required to run the LocalSpace backend and frontend applications.
+
+## Backend (`@backend/core`)
+
+These variables should be placed in a `.env` file inside the `backend/core` directory. You can create it by copying the `.env.example` file.
+
+- `TZ`: The timezone for the server (e.g., `UTC`).
+- `NODE_ENV`: The application environment (`development`, `production`, or `test`).
+- `PORT`: The port for the AdonisJS HTTP server.
+- `HOST`: The host for the AdonisJS HTTP server.
+- `LOG_LEVEL`: The logging level (e.g., `info`, `debug`).
+
+- `APP_NAME`: The name of your application.
+- `APP_KEY`: A secret key for encryption. Generate one with `node ace generate:key`.
+- `APP_URL`: The public URL of your backend.
+- `APP_CLIENT_URL`: The public URL of your frontend, used for generating links in emails.
+- `APP_ACCESS_KEY`: A secret key to bypass CAPTCHA for testing purposes.
+
+- `CAPTCHA_PRIVATE_KEY`: Your private key for the CAPTCHA service (e.g., Cloudflare Turnstile).
+
+- `DB_TYPE`: The database dialect (`mysql` or `sqlite`).
+- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`: Standard database connection details.
+
+- `LIMITER_STORE`: Where to store rate-limiting data (`database` or `memory`).
+
+- `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`: Connection details for Redis, used for caching and job queues.
+
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`: Connection details for your SMTP server for sending emails.
+
+## Frontend (`@frontend/app`)
+
+These variables are prefixed with `NEXT_PUBLIC_` and are embedded into the application at build time. They are defined in `@frontend/app/src/config/env.ts` and can be overridden with a `.env.local` file in the frontend directory.
+
+- `NEXT_PUBLIC_CAPTCHA_PUBLIC_KEY`: The public site key for your CAPTCHA service.
+- `NEXT_PUBLIC_BACKEND_URL`: The full URL to your running backend API (e.g., `http://localhost:3333`).
+- `NEXT_PUBLIC_FRONTEND_URL`: The canonical URL of the frontend application itself.
+- `NEXT_PUBLIC_NODE_ENV`: The environment (`development` or `production`).

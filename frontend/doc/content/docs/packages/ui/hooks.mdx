@@ -1,0 +1,100 @@
+---
+title: Hooks
+description: Documentation for reusable React hooks in @localspace/ui.
+---
+
+## useFormMutation
+
+This hook is a powerful abstraction that combines Mantine's `useForm` for form state management and TanStack Query's `useMutation` for handling asynchronous data submission. It simplifies form creation by co-locating form logic and mutation logic.
+
+### Parameters
+
+It accepts a single object that includes:
+
+- All properties from Mantine's `UseFormInput` (like `initialValues`, `validate`, etc.).
+- A `mutation` key containing all options for TanStack Query's `useMutation` (like `mutationFn`, `onSuccess`, `onError`).
+
+### Return Value
+
+It returns an object containing:
+
+- `form`: The instance returned by `useForm`, which you can use to manage form fields.
+- `mutation`: The result object returned by `useMutation`, which contains the mutation's state (`isPending`, `isSuccess`, etc.) and methods (`mutate`).
+
+### Usage
+
+This hook is best used with the `Form` component.
+
+```tsx
+import { useFormMutation, handleError } from "@localspace/ui";
+import { Form } from "@localspace/ui/components";
+import { Button, TextInput, Stack } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { client } from "#lib/client"; // Your configured Tuyau client
+
+const CreateUserForm = () => {
+  // 1. Set up the form and mutation logic
+  const { form, mutation } = useFormMutation({
+    // Mantine form options
+    initialValues: {
+      name: "",
+      email: "",
+    },
+    validate: {
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+    },
+    // TanStack Query mutation options
+    mutation: {
+      mutationFn: (vars: { name: string; email: string }) => {
+        // This function sends the data to the server
+        return client.api.v1.users.post(vars);
+      },
+      onSuccess: () => {
+        notifications.show({ message: "User created successfully!" });
+        form.reset();
+      },
+      onError: (error) => {
+        // Use the handleError utility to show notifications or form errors
+        handleError(error, { form });
+      },
+    },
+  });
+
+  // 2. Render the form
+  return (
+    <Form
+      form={form}
+      mutation={mutation}
+      submit={(values) => mutation.mutate(values)}
+    >
+      {({ loading, isDirty }) => (
+        <Stack>
+          <TextInput label="Name" {...form.getInputProps("name")} />
+          <TextInput label="Email" {...form.getInputProps("email")} />
+          <Button
+            type="submit"
+            loading={loading}
+            disabled={!isDirty || loading}
+          >
+            Create User
+          </Button>
+        </Stack>
+      )}
+    </Form>
+  );
+};
+```
+
+---
+
+## useCaptcha
+
+A hook to get a `ref` for the `Captcha` component and a function to reset it.
+
+- **Returns**
+  - `captchaRef`: A `ref` to attach to the `Captcha` component.
+  - `resetCaptcha`: A function to programmatically reset the captcha.
+
+### Usage
+
+See the example in the [Captcha component documentation](/docs/packages/ui/components#captcha).

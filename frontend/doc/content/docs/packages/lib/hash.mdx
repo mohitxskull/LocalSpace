@@ -1,0 +1,31 @@
+---
+title: Hash
+description: Documentation for the non-cryptographic hash utility.
+---
+
+## `hash`
+
+The `hash` function provides a fast, non-cryptographic hashing algorithm (MurmurHash3 x86 128-bit). It's ideal for scenarios where you need a quick and deterministic way to generate a hash from a string or buffer, such as in hash tables, checksums, or for generating unique IDs from content.
+
+**Note:** This is not a cryptographically secure hash. Do not use it for passwords or other security-sensitive data.
+
+### Usage
+
+```typescript
+import { hash } from "@localspace/lib";
+
+const stringToHash = "Hello, World!";
+
+// Hash a string
+const stringHash = hash(stringToHash);
+console.log(stringHash); // e.g., '94cd25a1fa21953475635b6667d916f3'
+
+// Using a seed
+const seededHash = hash(stringToHash, 12345);
+console.log(seededHash); // e.g., '5a88331a4d5071b44e23a5c83374a9bd'
+
+// Hash a buffer
+const buffer = new TextEncoder().encode(stringToHash);
+const bufferHash = hash(buffer);
+console.log(bufferHash); // Same as stringHash
+```

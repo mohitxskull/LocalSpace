@@ -1,0 +1,375 @@
+---
+title: Base Classes
+description: Documentation for BaseCacher, BaseHelper, and BaseTransformer.
+---
+
+# Base Classes
+
+This document covers the base classes provided in the Node Library: `BaseCacher`, `BaseHelper`, and `BaseTransformer`.
+
+### Features
+
+- **Model-Specific Caching**: Each cacher is tied to a specific Lucid model, promoting organized and maintainable cache logic.
+- **Namespace Management**: It simplifies cache namespacing, allowing you to create isolated cache spaces for different models and even for individual model instances.
+- **Extensible**: As an abstract class, it's meant to be extended, allowing you to add model-specific caching methods.
+
+### Usage
+
+The common pattern is to create a cacher class for a model and then instantiate it via a static getter on the model itself. This makes the cacher easily accessible wherever you have the model class.
+
+#### Example
+
+Let's create a caching service for a `Workspace` model.
+
+**1. Create the Cacher Class:**
+
+This class can contain methods that define what and how to cache data related to the `Workspace` model.
+
+```typescript
+// app/cachers/workspace.ts
+import Workspace from "#models/workspace";
+import { BaseCacher, ScopedCache } from "@localspace/node-lib";
+import { promiseMap } from "@localspace/lib";
+
+export class WorkspaceCacher extends BaseCacher<typeof Workspace, string> {
+  getActiveMembers(params: { workspace: Workspace }) {
+    return ScopedCache.create(this.space({ id: params.workspace.id }), {
+      key: "active-members",
+      factory: async () => {
+        const workspaceMembers =
+          await params.workspace.helper.activeMemberQuery;
+        return await promiseMap(
+          workspaceMembers,
+          async (m) => await m.transformer.serialize(),
+        );
+      },
+    });
+  }
+}
+```
+
+**2. Add the Cacher to Your Model:**
+
+Use a static getter on the model to provide a single, consistent instance of the cacher.
+
+```typescript
+// app/models/workspace.ts
+import { BaseModel } from "@adonisjs/lucid/orm";
+import { WorkspaceCacher } from "#cacher/workspace";
+import cache from "@adonisjs/cache/services/main";
+
+export default class Workspace extends BaseModel {
+  // ... your model properties
+
+  static get cacher() {
+    // `this.table` provides the model's table name, e.g., 'workspaces'
+    return new WorkspaceCacher(Workspace, cache.namespace(this.table));
+  }
+}
+```
+
+**3. Use the Cacher in Your Application:**
+
+Now you can easily use the cacher in your controllers or services.
+
+```typescript
+// In a controller or service
+const workspace = await Workspace.findOrFail(id);
+
+// Get active members. If not in cache, the factory runs and caches the result.
+const activeMembers = await Workspace.cacher
+  .getActiveMembers({ workspace })
+  .get();
+
+// When a member is added or removed, you can invalidate the cache.
+await Workspace.cacher.getActiveMembers({ workspace }).delete();
+```
+
+### API
+
+#### constructor
+
+`constructor(model: T, space: CacheProvider)`
+
+<TypeTable
+  type={{
+    model: {
+      description:
+        "The Lucid model class you want to associate with this cacher.",
+      type: "T",
+      required: true,
+    },
+    space: {
+      description:
+        "The AdonisJS `CacheProvider` instance, usually namespaced for the model.",
+      type: "CacheProvider",
+      required: true,
+    },
+  }}
+/>
+
+#### space
+
+`space(params?: { namespace?: Spaces; id?: string }): CacheProvider`
+
+<TypeTable
+  type={{
+    params: {
+      description: "An object with namespace and id.",
+      type: "object",
+    },
+    "params.namespace": {
+      description: "A sub-namespace to further scope the cache.",
+      type: "Spaces",
+    },
+    "params.id": {
+      description:
+        "An identifier to create a cache namespace for a specific model instance.",
+      type: "string",
+    },
+  }}
+/>
+
+**Returns:** A `CacheProvider` instance that you can use to perform cache operations like `get`, `set`, `getOrSet`, etc.
+
+---
+
+## BaseHelper
+
+The `BaseHelper` is a simple abstract class designed to provide helper functionalities to your Lucid models. It's a great way to encapsulate logic that is specific to a model instance, keeping your model files clean and focused on their primary responsibilities (database schema, relationships, etc.).
+
+### Features
+
+- **Instance-Specific Logic**: Helpers are instantiated with a model instance, so you can perform actions or calculations based on the instance's data.
+- **Clean Code**: It helps you separate business logic from the model definition, leading to more organized and maintainable code.
+- **Extensible**: You can add any methods you need to the helper class, tailored to the model's requirements.
+
+### Usage
+
+To use `BaseHelper`, you create a new class that extends it, providing your Lucid model as the type parameter. Then, you can add a getter to your model to easily access the helper.
+
+#### Example
+
+Let's add a helper to a `User` model to calculate how many workspaces they own.
+
+**1. Create the Helper Class:**
+
+```typescript
+// app/helpers/user.ts
+import { dbRef } from "#database/reference";
+import User from "#models/user";
+import { workspaceMemberRoleE } from "#types/literals";
+import { BaseHelper } from "@localspace/node-lib";
+
+export class UserHelper extends BaseHelper<User> {
+  /**
+   * Calculates the number of workspaces owned by the user.
+   */
+  async getOwnedWorkspaceCount(): Promise<number> {
+    const result = await this.resource
+      .related("workspaceMember")
+      .query()
+      .where(dbRef.workspaceMember.role, workspaceMemberRoleE("owner"))
+      .count("*", "total");
+
+    // The result of count is an array with a single object like [{ total: 5 }]
+    return result[0].$extras.total as number;
+  }
+}
+```
+
+**2. Add the Helper to Your Model:**
+
+Now, add a getter to your `User` model to instantiate and return the `UserHelper`.
+
+```typescript
+// app/models/user.ts
+import { BaseModel } from "@adonisjs/lucid/orm";
+import { UserHelper } from "#helper/user";
+
+export default class User extends BaseModel {
+  // ... your columns and relationships
+
+  get helper() {
+    return new UserHelper(this);
+  }
+}
+```
+
+**3. Use the Helper:**
+
+Now you can easily access the helper methods from any `User` instance, for example, in a controller before creating a new workspace for a user.
+
+```typescript
+// In a controller or service
+const user = await User.findOrFail(1);
+const ownedWorkspaces = await user.helper.getOwnedWorkspaceCount();
+
+if (ownedWorkspaces >= 5) {
+  throw new Error("User has reached the maximum number of workspaces.");
+}
+```
+
+### API
+
+#### constructor
+
+`constructor(protected readonly resource: TR)`
+
+<TypeTable
+  type={{
+    resource: {
+      description:
+        "The Lucid model instance (`LucidRow`) that the helper will operate on. This is automatically passed when you instantiate the helper.",
+      type: "TR",
+      required: true,
+    },
+  }}
+/>
+
+---
+
+## BaseTransformer
+
+The `BaseTransformer` is an abstract class that provides a standardized way to transform your Lucid models into plain JavaScript objects. This is especially useful when you need to control the JSON output of your models for API responses, ensuring that you only expose the data you want in the format you need.
+
+### Features
+
+- **Standardized Serialization**: Provides a consistent `serialize` method for all your transformers.
+- **Data Hiding**: Easily control which model attributes are included or excluded from the final output.
+- **Utility Methods**: Includes `pick` and `omit` helpers to make it easy to select or remove properties from your model.
+- **Date Formatting**: Comes with a built-in `datetime` method to serialize `DateTime` objects to ISO strings.
+
+### Usage
+
+To use `BaseTransformer`, you create a new class that extends it and implements the `serialize` method.
+
+#### Example
+
+Let's say you have a `User` model and you want to control how it's serialized for an API response.
+
+**1. Create the Transformer Class:**
+
+```typescript
+// app/transformers/user.ts
+import { BaseTransformer } from "@localspace/node-lib";
+import User from "#models/user";
+
+export class UserTransformer extends BaseTransformer<User> {
+  async serialize() {
+    return {
+      id: this.resource.id,
+      name: this.resource.name,
+      email: this.resource.email,
+      createdAt: this.datetime(this.resource.createdAt),
+      updatedAt: this.datetime(this.resource.updatedAt),
+    };
+  }
+
+  // You can add other transformation methods for different contexts
+  async forPublicProfile() {
+    return {
+      id: this.resource.id,
+      name: this.resource.name,
+    };
+  }
+}
+```
+
+**2. Add the Transformer to Your Model:**
+
+Add a getter to your `User` model to easily access the transformer.
+
+```typescript
+// app/models/user.ts
+import { BaseModel } from "@adonisjs/lucid/orm";
+import { UserTransformer } from "#transformers/user";
+
+export default class User extends BaseModel {
+  // ... your columns and relationships
+
+  get transformer() {
+    return new UserTransformer(this);
+  }
+}
+```
+
+**3. Use the Transformer:**
+
+Now you can call the `serialize` method from your user instance.
+
+```typescript
+const user = await User.find(1);
+
+// In a controller for an authenticated user's own profile
+return user.transformer.serialize();
+
+// In a public-facing page, you might want to expose less information
+return user.transformer.forPublicProfile();
+```
+
+### API
+
+#### serialize
+
+`abstract serialize(): Promise<Record<string, unknown>>`
+
+This is the main method you need to implement. It should return a promise that resolves to a plain JavaScript object representing your transformed model.
+
+**Returns:** `Promise<Record<string, unknown>>`
+
+#### pick
+
+`protected pick<T extends object, K extends keyof T>(source: T, keys: K[]): Pick<T, K>`
+
+A utility method to create a new object with only the specified keys from the source object.
+
+<TypeTable
+  type={{
+    source: {
+      description:
+        "The object to pick properties from (usually `this.resource`).",
+      type: "T",
+      required: true,
+    },
+    keys: {
+      description: "An array of keys to include in the new object.",
+      type: "K[]",
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Pick<T, K>`
+
+#### omit
+
+`protected omit<T extends object, K extends keyof T>(source: T, keys: K[]): Omit<T, K>`
+
+A utility method to create a new object without the specified keys from the source object.
+
+<TypeTable
+  type={{
+    source: {
+      description:
+        "The object to omit properties from (usually `this.resource`).",
+      type: "T",
+      required: true,
+    },
+    keys: {
+      description: "An array of keys to exclude from the new object.",
+      type: "K[]",
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `Omit<T, K>`
+
+#### datetime
+
+`protected datetime = serializeDateTime`
+
+A pre-bound method that serializes a `DateTime` object into an ISO 8601 string. It handles null values gracefully.
+
+**Returns:** `string | null`

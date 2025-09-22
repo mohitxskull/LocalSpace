@@ -1,0 +1,18 @@
+type: http_request
+model: http_request
+id: rq_LZ3YfwoWeJ
+createdAt: 2025-09-06T14:15:42.782309898
+updatedAt: 2025-09-06T14:24:05.520724355
+workspaceId: wk_7BHps5Fohe
+folderId: null
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: Ping
+sortPriority: 2000.0
+url: ${[ BASE ]}/ping
+urlParameters: []

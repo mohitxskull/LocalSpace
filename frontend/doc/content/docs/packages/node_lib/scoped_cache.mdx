@@ -1,0 +1,226 @@
+---
+title: ScopedCache
+description: The `ScopedCache` is a powerful, type-safe, and hierarchical cache manager built on top of the AdonisJS cache provider. It simplifies working with namespaced keys, making it easy to create, manage, and invalidate related cached data.
+---
+
+## Features
+
+- **Automatic Namespacing**: Each `ScopedCache` instance manages its own namespace, preventing key collisions.
+- **Hierarchical Caching**: You can `extend` a cache to create child caches, forming a logical tree of cached data (e.g., `user:1` -> `user:1:posts`).
+- **Type-Safe**: It's fully generic, so you get type safety for your cached values.
+- **Factory Functions**: It uses factory functions (`() => Promise<T>`) to fetch and cache data only when it's not already in the cache.
+- **Graceful Invalidation**: Provides methods to `delete` a specific cache entry or `clearNamespace` to wipe out an entire branch of the cache tree.
+
+## Usage
+
+`ScopedCache` is powerful on its own, but it integrates very well with the `BaseCacher` pattern to organize your application's caching logic.
+
+### Creating and Using a Scoped Cache
+
+Here's an example of using `ScopedCache` inside a `WorkspaceCacher` to cache a workspace's active members.
+
+```typescript
+// In app/cachers/workspace_cacher.ts
+import { BaseCacher, ScopedCache } from "@localspace/node-lib";
+import Workspace from "#models/workspace";
+
+export class WorkspaceCacher extends BaseCacher<typeof Workspace> {
+  // ... instantiation via static getter on the model ...
+
+  getActiveMembers(workspace: Workspace) {
+    // Use the cacher's space, namespaced by the workspace ID
+    const space = this.space({ id: workspace.id });
+
+    return ScopedCache.create(space, {
+      key: "active-members",
+      ttl: "10m",
+      factory: async () => {
+        const members = await workspace
+          .related("members")
+          .query()
+          .whereNull("leftAt");
+        // It's a good practice to transform data before caching
+        return Promise.all(
+          members.map((member) => member.transformer.serialize()),
+        );
+      },
+    });
+  }
+}
+
+// In a controller
+const workspace = await Workspace.findOrFail(id);
+const cacher = Workspace.cacher.getActiveMembers(workspace);
+
+// Get the members. If not in cache, the factory runs and caches the result.
+const members = await cacher.get();
+
+// Later, when a member is added or removed, invalidate the cache.
+await cacher.delete();
+```
+
+### Hierarchical Caching and Invalidation
+
+The `extend` method allows you to build a tree of cached data, making invalidation more granular and logical.
+
+```typescript
+import { ScopedCache } from "@localspace/node-lib";
+import cache from "@adonisjs/cache/services/main";
+
+// 1. Create a root cache for a single workspace
+const workspaceCache = ScopedCache.create(cache.namespace("workspaces"), {
+  key: workspace.id,
+  factory: () => Workspace.findOrFail(workspace.id),
+});
+
+// 2. Create a child cache for the workspace's latest blogs
+// The factory for the child receives the parent's data (the workspace object)
+const blogsCache = workspaceCache.extend("blogs", (ws) => {
+  return ws
+    .related("blogs")
+    .query()
+    .orderBy("createdAt", "desc")
+    .limit(5)
+    .exec();
+});
+
+// This will fetch and cache the workspace first, then its blogs
+const latestBlogs = await blogsCache.get();
+
+// --- Invalidation --- //
+
+// When a new blog is created, you only need to invalidate the blogs cache.
+// The parent workspaceCache remains valid.
+await blogsCache.delete();
+
+// When the workspace itself is updated (e.g., renamed), you can clear its
+// entire namespace, which invalidates the workspace AND all its children (blogs).
+await workspaceCache.clearNamespace();
+```
+
+## API
+
+### create
+
+`static create<T>(space: CacheProvider, params: ScopedCacheOptions<T>): ScopedCache<T>`
+
+<TypeTable
+  type={{
+    space: {
+      description: "The base AdonisJS cache provider (e.g., `cache.driver()`).",
+      type: "CacheProvider",
+      required: true,
+    },
+    params: {
+      description:
+        "An object with `key`, `factory`, and optional `ttl`, `gracePeriod`, etc.",
+      type: "ScopedCacheOptions<T>",
+      required: true,
+    },
+  }}
+/>
+
+### get
+
+`async get(options?: { latest?: boolean }): Promise<T>`
+
+Retrieves the value from the cache. If `latest: true`, it will bypass the cache and re-run the factory.
+
+<TypeTable
+  type={{
+    options: {
+      description: "An object with a `latest` boolean property.",
+      type: "object",
+    },
+    "options.latest": {
+      description:
+        "If `true`, it will bypass the cache and re-run the factory.",
+      type: "boolean",
+    },
+  }}
+/>
+
+### peek
+
+`async peek(): Promise<T | undefined>`
+
+Retrieves the value from the cache but returns `undefined` if it's not found, without running the factory.
+
+### set
+
+`async set(value: T): Promise<void>`
+
+Manually sets the value in the cache, bypassing the factory.
+
+<TypeTable
+  type={{
+    value: {
+      description: "The value to set in the cache.",
+      type: "T",
+      required: true,
+    },
+  }}
+/>
+
+### extend
+
+`extend<U>(key: string, factory: (parentValue: T) => U | Promise<U>, options?: SetCommonOptions): ScopedCache<U>`
+
+Creates a dependent child cache.
+
+<TypeTable
+  type={{
+    key: {
+      description: "The key for the child cache.",
+      type: "string",
+      required: true,
+    },
+    factory: {
+      description:
+        "A factory function that receives the parent`s resolved value.",
+      type: "(parentValue: T) => U | Promise<U>",
+      required: true,
+    },
+    options: {
+      description: "Common cache options.",
+      type: "SetCommonOptions",
+    },
+  }}
+/>
+
+### derive
+
+`derive<U>(key: string, factory: GetSetFactory<U>, options?: SetCommonOptions): ScopedCache<U>`
+
+Creates an independent child cache in a nested namespace.
+
+<TypeTable
+  type={{
+    key: {
+      description: "The key for the child cache.",
+      type: "string",
+      required: true,
+    },
+    factory: {
+      description: "A factory function for the child cache.",
+      type: "GetSetFactory<U>",
+      required: true,
+    },
+    options: {
+      description: "Common cache options.",
+      type: "SetCommonOptions",
+    },
+  }}
+/>
+
+### delete
+
+`async delete(): Promise<boolean>`
+
+Deletes the value for the current scope.
+
+### clearNamespace
+
+`async clearNamespace(): Promise<boolean>`
+
+Deletes the value for the current scope and all its children.

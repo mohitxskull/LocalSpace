@@ -1,0 +1,61 @@
+---
+title: Array Utilities
+description: Documentation for type-safe array utilities like oneOf and exclude.
+---
+
+## `oneOf`
+
+The `oneOf` function is a factory that creates a validator function. This validator ensures a given value is one of the elements in a provided constant list, throwing a descriptive error if it's not. It's particularly useful for working with string literal union types.
+
+### Usage
+
+This utility is used in `@backend/core` to create type-safe enums from constant arrays.
+
+```typescript
+// in types/literals.ts
+import { oneOf } from "@localspace/lib";
+
+export const roleC = ["admin", "customer"] as const;
+export type RoleT = (typeof roleC)[number];
+export const roleE = oneOf(roleC);
+
+// In your code
+const userRole: RoleT = roleE("customer"); // OK
+const adminRole: RoleT = roleE("admin"); // OK
+
+try {
+  roleE("guest"); // Throws: Invalid value: "guest". Expected one of: admin, customer
+} catch (e) {
+  console.error(e.message);
+}
+```
+
+## `exclude`
+
+The `exclude` function creates a new array from a `const` array of strings, while safely removing a specified value. It preserves the literal union type of the remaining elements, which is very powerful for creating subtypes.
+
+### Usage
+
+This utility is used in `@backend/core` to create a list of updatable roles, excluding the 'owner' role which should not be assignable.
+
+```typescript
+// in types/literals.ts
+export const workspaceMemberRoleC = [
+  "owner",
+  "editor",
+  "manager",
+  "viewer",
+] as const;
+
+// in validators/workspace_member.ts
+import { workspaceMemberRoleC } from "#types/literals";
+import { exclude } from "@localspace/lib";
+import vine from "@vinejs/vine";
+
+// Creates a new array ['editor', 'manager', 'viewer'] with a narrowed type
+const updatableRoles = exclude(workspaceMemberRoleC, "owner");
+
+export const WorkspaceMemberUpdatableRoleS = () => vine.enum(updatableRoles);
+
+// Now WorkspaceMemberUpdatableRoleS will only validate 'editor', 'manager', or 'viewer'.
+```

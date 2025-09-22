@@ -1,0 +1,179 @@
+---
+title: Database Utilities
+description: Documentation for Column Utilities and iLike.
+---
+
+## Column Utilities
+
+This section contains helpers for defining custom column behaviors in your Lucid models.
+
+### `JSONColumn`
+
+#### Features
+
+- **Automatic Serialization**: Automatically runs `JSON.stringify` on the value before saving it to the database.
+- **Automatic Deserialization**: Automatically runs `JSON.parse` on the value when it's retrieved from the database.
+- **Null Handling**: Gracefully handles `null` values.
+- **Custom Serializer**: You can provide your own custom `serialize` and `deserialize` functions for more complex scenarios (e.g., using a more advanced serialization library).
+
+#### Usage
+
+To use it, import `JSONColumn` and use it in your model's column definition.
+
+**1. In Your Model:**
+
+```typescript
+// app/models/user_profile.ts
+
+import { BaseModel, column } from "@adonisjs/lucid/orm";
+import { JSONColumn } from "@localspace/node-lib/column/json";
+
+export default class UserProfile extends BaseModel {
+  // ... other columns
+
+  @column(JSONColumn())
+  declare settings: { theme: string; notifications: boolean };
+}
+```
+
+**2. In Your Code:**
+
+Now you can interact with the `settings` property as a regular JavaScript object, and Lucid will handle the serialization behind the scenes.
+
+```typescript
+const profile = await UserProfile.find(1);
+
+// Get a value
+const theme = profile.settings.theme; // 'dark'
+
+// Set a value
+profile.settings.notifications = false;
+
+// The whole object will be stringified when you save
+await profile.save();
+```
+
+#### Custom Serializer Example
+
+If you need more control over the serialization process, you can pass a custom serializer.
+
+```typescript
+import SuperJSON from 'superjson';
+
+// ... in your model
+
+@column(JSONColumn({
+  serializer: {
+    serialize: (value) => SuperJSON.stringify(value),
+    deserialize: (value) => SuperJSON.parse(value),
+  }
+}))
+declare complexData: { now: Date };
+```
+
+### API
+
+#### JSONColumn
+
+`JSONColumn(options?: Partial<ColumnOptions & { serializer?: ... }>): Partial<ColumnOptions>`
+
+<TypeTable
+  type={{
+    options: {
+      description:
+        "An object that can contain any standard Lucid ColumnOptions, plus a serializer object.",
+      type: "object",
+      parameters: [
+        {
+          name: "serializer",
+          description: "A custom serializer object.",
+        },
+      ],
+    },
+  }}
+/>
+
+**Returns:** A partial `ColumnOptions` object with `prepare` and `consume` hooks configured for JSON serialization.
+
+---
+
+## iLike
+
+The `iLike` function is a simple but powerful utility for generating a case-insensitive SQL `LIKE` clause. It's designed to be used with the AdonisJS Lucid query builder, particularly with `whereRaw` conditions, to perform substring searches without worrying about the case of the data in the database or the search query.
+
+### Features
+
+- **Case-Insensitive**: Automatically converts both the column and the search value to lowercase.
+- **Substring Matching**: Wraps the search value with `%` wildcards, so it matches anywhere in the string.
+- **SQL Injection Safe**: It returns the SQL fragment and the parameter separately, allowing the Lucid query builder to safely handle the value.
+- **Database Agnostic**: While the `LOWER` function is standard SQL, this approach is generally compatible with common SQL databases like PostgreSQL and MySQL.
+
+### Usage
+
+`iLike` is a perfect fit for the `whereRaw` clause in a Lucid query, especially when building search functionality.
+
+#### Example
+
+Here is how you can implement a case-insensitive search for workspaces in a controller.
+
+```typescript
+import { iLike } from "@localspace/node-lib";
+import Workspace from "#models/workspace";
+import { dbRef } from "#database/reference";
+import type { HttpContext } from "@adonisjs/core/http";
+
+// Inside a controller method for searching workspaces
+export default class WorkspacesController {
+  async search({ request }: HttpContext) {
+    const searchTerm = request.input("q", ""); // Get search term from query string
+
+    if (!searchTerm) {
+      return Workspace.all();
+    }
+
+    const workspaces = await Workspace.query()
+      .whereRaw(...iLike(dbRef.workspace.name, searchTerm))
+      .exec();
+
+    return workspaces;
+  }
+}
+
+// A request to GET /workspaces/search?q=test
+// will find workspaces with names like 'Test Workspace', 'My-Test', etc.
+```
+
+#### How it Works
+
+The `iLike` function returns a tuple containing two elements:
+
+1.  **The SQL String**: `LOWER(columnName) LIKE ?`
+2.  **The Parameters Array**: `['%searchvalue%']`
+
+The spread operator (`...`) in the example above passes these two elements as separate arguments to `whereRaw`, which is exactly what it expects.
+
+### API
+
+#### iLike
+
+`iLike(columnName: string, value: string): [string, [string]]`
+
+<TypeTable
+  type={{
+    columnName: {
+      description: "The name of the database column you want to search in.",
+      type: "string",
+      required: true,
+    },
+    value: {
+      description: "The search string.",
+      type: "string",
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** A tuple where:
+
+- The first element is the SQL query fragment.
+- The second element is an array containing the sanitized and wildcard-wrapped search value.

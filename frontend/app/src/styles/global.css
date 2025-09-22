@@ -1,0 +1,10 @@
+@layer mantine, mantine-datatable, mantine-contextmenu;
+
+::selection {
+  color: var(--mantine-color-white);
+  background: var(--mantine-color-dark-9);
+}
+
+.nofocus:focus {
+  outline: none;
+}

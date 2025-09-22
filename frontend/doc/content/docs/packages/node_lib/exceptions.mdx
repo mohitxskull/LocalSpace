@@ -1,0 +1,135 @@
+---
+title: Exception Handling
+description: This module provides a robust and structured way to handle HTTP exceptions in your AdonisJS application. It includes a base `HTTPException` class, a list of pre-defined common HTTP exceptions, and a parser to convert various error types into a consistent format.
+---
+
+## `HTTPException`
+
+The `HTTPException` class is the cornerstone of the exception handling system. It extends the AdonisJS `Exception` class and adds several useful properties for creating rich, informative error responses.
+
+### Features
+
+- **Structured Error Responses**: Automatically generates a JSON response with fields like `id`, `status`, `code`, `message`, `help`, `metadata`, and `source`.
+- **Automatic Logging**: It integrates with the AdonisJS logger, automatically logging 4xx errors as warnings and 5xx errors as errors.
+- **Customizable**: You can set a custom status, error code, and add user-safe `metadata` or internal `reason` details.
+
+### Usage
+
+```typescript
+import { HTTPException } from "@localspace/node-lib/exception";
+
+// Throw a generic exception
+throw new HTTPException("Something went wrong", {
+  status: 500,
+  code: "E_CUSTOM_ERROR",
+});
+
+// Throw an exception with metadata for the client
+throw new HTTPException("Invalid input", {
+  status: 400,
+  metadata: [{ field: "username", message: "Username is already taken" }],
+});
+```
+
+<TypeTable
+  type={{
+    message: {
+      description: "The error message.",
+      type: "string",
+      required: true,
+    },
+    options: {
+      description: "An object with additional options.",
+      type: "object",
+    },
+    "options.status": {
+      description: "The HTTP status code.",
+      type: "number",
+    },
+    "options.code": {
+      description: "A custom error code.",
+      type: "string",
+    },
+    "options.metadata": {
+      description: "User-safe metadata to be included in the response.",
+      type: "any",
+    },
+    "options.reason": {
+      description: "Internal reason for the error.",
+      type: "any",
+    },
+  }}
+/>
+
+## Pre-defined Exception Classes
+
+The library includes a comprehensive list of pre-defined exception classes that extend `HTTPException`, covering most standard HTTP status codes. This makes your code more readable and declarative.
+
+### Examples
+
+Using pre-defined exceptions makes your code more semantic and easier to read.
+
+```typescript
+import {
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from "@localspace/node-lib/exception";
+import User from "#models/user";
+
+// Example 1: Handling a resource that doesn't exist.
+const user = await User.find(id);
+if (!user) {
+  throw new NotFoundException("User not found");
+}
+
+// Example 2: Checking permissions before an action.
+if (await user.cannot("delete", post)) {
+  throw new ForbiddenException("You are not allowed to delete this post.");
+}
+
+// Example 3: Handling invalid input with more context.
+const existingUser = await User.findBy("email", email);
+if (existingUser) {
+  // The `source` can be used by the frontend to highlight the correct field.
+  // The `reason` is for internal logging and won't be sent to the client.
+  throw new BadRequestException("Invalid email or password.", {
+    source: "email",
+    reason: "User not found with the given email.",
+  });
+}
+```
+
+## `parseError`
+
+The `parseError` function is a utility to convert different types of errors into a standardized `HTTPException`. This is extremely useful in your global exception handler.
+
+### Supported Error Types
+
+- `HTTPException`: Returns the exception as-is.
+- VineJS `E_VALIDATION_ERROR`: Converts it to an `UnprocessableEntityException` and puts the validation messages in the `metadata` field.
+- AdonisJS `Exception`: Converts it to a generic `HTTPException`, preserving the original status and code.
+- `SyntaxError`: Converts it to an `InternalServerErrorException`.
+- Any other `unknown` error: Converts it to a generic `InternalServerErrorException`.
+
+### Usage
+
+In your global exception handler (`app/exceptions/handler.ts`):
+
+```typescript
+// app/exceptions/handler.ts
+
+import { HttpContext, ExceptionHandler } from "@adonisjs/core/http";
+import { parseError } from "@localspace/node-lib/exception";
+
+export default class HttpExceptionHandler extends ExceptionHandler {
+  async handle(error: unknown, ctx: HttpContext) {
+    // The magic happens here!
+    return super.handle(parseError(error), ctx);
+  }
+
+  async report(error: unknown, ctx: HttpContext) {
+    return super.report(parseError(error), ctx);
+  }
+}
+```

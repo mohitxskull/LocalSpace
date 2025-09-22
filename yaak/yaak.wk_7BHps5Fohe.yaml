@@ -1,0 +1,23 @@
+type: workspace
+model: workspace
+id: wk_7BHps5Fohe
+createdAt: 2025-09-06T14:14:01.564699315
+updatedAt: 2025-09-06T14:25:27.992832943
+authentication:
+  token: ${[ TOKEN ]}
+authenticationType: bearer
+description: ''
+headers:
+- enabled: true
+  name: token
+  value: ${[ APP_ACCESS_KEY ]}
+  id: e2Wd884YtK
+- enabled: true
+  name: ''
+  value: ''
+  id: ZezDvcc9BK
+name: LocalSpace
+encryptionKeyChallenge: null
+settingValidateCertificates: true
+settingFollowRedirects: true
+settingRequestTimeout: 0

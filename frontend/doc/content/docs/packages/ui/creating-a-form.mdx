@@ -1,0 +1,187 @@
+---
+title: "Creating a Form"
+description: A step-by-step guide to building a complete form using the tools in this boilerplate.
+---
+
+This guide walks through the implementation of the Sign In page (`@frontend/app/src/pages/signin.tsx`) to demonstrate how the various components and hooks from `@localspace/ui` work together with the `tuyau` API client.
+
+## The Goal
+
+We want to create a secure sign-in form with the following features:
+
+- Email and password fields.
+- Client-side and server-side validation.
+- A CAPTCHA to prevent bots.
+- Informative notifications for success and error states.
+- Specific UI changes for custom errors (e.g., showing a "Resend Verification" button).
+
+## 1. The API Client (`tuyau.ts`)
+
+Before building the UI, it's important to understand how the frontend communicates with the backend. The API client is configured in `@frontend/app/src/lib/tuyau.ts`.
+
+```typescript
+// @frontend/app/src/lib/tuyau.ts
+import { api } from "@localspace/backend-core/api";
+import { createTuyau } from "@tuyau/client";
+import { createTuyauContext } from "@tuyau/react-query";
+import { cookieManager } from "./cookie_manager";
+import { env } from "@/config/env";
+
+export const client = createTuyau({
+  api, // Type definitions imported from the backend
+  baseUrl: env.NEXT_PUBLIC_BACKEND_URL,
+  hooks: {
+    // This hook runs before every single API request
+    beforeRequest: [
+      (request) => {
+        // Automatically attach the auth token if it exists
+        const token = cookieManager.getCookie("token");
+        if (token) {
+          request.headers.set("Authorization", `Bearer ${token}`);
+        }
+
+        // Automatically attach the captcha token if it exists
+        const captcha = cookieManager.getCookie("captcha");
+        if (captcha) {
+          request.headers.set("captcha", captcha);
+        }
+      },
+    ],
+  },
+});
+
+export const { TuyauProvider, useTuyau, useTuyauClient } =
+  createTuyauContext<typeof api>();
+```
+
+The key feature here is the `beforeRequest` hook. It automatically reads the `token` and `captcha` values from cookies and adds them as headers to every API call. This simplifies our component logic, as we don't need to manually add these headers for each mutation.
+
+## 2. The Form Page (`signin.tsx`)
+
+This file brings everything together. Let's break it down.
+
+### Setup and State
+
+First, we import all the necessary hooks and components and define the local state for the page.
+
+```typescript
+// @frontend/app/src/pages/signin.tsx
+
+// ... imports
+import { useSession } from "@/lib/hooks/use_session";
+import { useTuyau } from "@/lib/tuyau";
+import { useFormMutation } from "@/lib/hooks/use_form_mutation";
+import { useCaptcha } from "@localspace/ui/components";
+import { handleError } from "@localspace/ui/lib/handle_error";
+
+export default function Page() {
+  const session = useSession();
+  const tuyau = useTuyau();
+  const router = useRouter();
+  const { captchaRef, resetCaptcha } = useCaptcha();
+
+  // Local state to manage the UI
+  const [isCaptchaReady, setIsCaptchaReady] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+
+  // ... rest of the component
+}
+```
+
+### The Mutation
+
+We use our `useFormMutation` hook to define the form's initial values, validation, and the API mutation logic.
+
+```typescript
+// ... inside the Page component
+
+const { form, mutation } = useFormMutation({
+  // 1. Mutation logic from TanStack Query
+  mutation: tuyau.api.v1.customer.auth.signin.$post.mutationOptions({
+    onSuccess: (res) => {
+      // On success, store the token and redirect
+      cookieManager.setCookie("token", res.token.value, {
+        expires: new Date(res.token.expiresAt),
+      });
+      notifications.show({ message: res.message });
+      router.push("/app");
+    },
+    onError: (error) => {
+      resetCaptcha();
+      setShowResend(false);
+      // Use our global error handler
+      handleError(error, {
+        form,
+        // Handle a specific error code from the backend
+        onErrorData: (errorData) => {
+          if (errorData.code === "EMAIL_NOT_VERIFIED") {
+            setShowResend(true);
+          }
+        },
+      });
+    },
+  }),
+  // 2. Initial values for the Mantine form
+  initialValues: {
+    payload: {
+      email: "",
+      password: "",
+    },
+  },
+});
+```
+
+This setup is declarative and co-locates all the logic related to the sign-in action.
+
+### Rendering the UI
+
+Finally, we render the components. We use the `Form` component from `@localspace/ui` to wrap our inputs. It provides the `loading` and `isDirty` states to its children, which we use to control the UI.
+
+```tsx
+// ... inside the Page component's return statement
+
+<Form mutation={mutation} submit={(d) => mutation.mutate(d)} form={form}>
+  {({ loading, isDirty }) => (
+    <>
+      <TextInput
+        label="Email"
+        {...form.getInputProps("payload.email")}
+        disabled={loading}
+      />
+      <PasswordInput
+        label="Password"
+        {...form.getInputProps("payload.password")}
+        disabled={loading}
+      />
+
+      {/* Conditionally render the Captcha only when the user starts typing */}
+      {isDirty && (
+        <Captcha
+          ref={captchaRef}
+          siteKey={env.NEXT_PUBLIC_CAPTCHA_PUBLIC_KEY}
+          onMessage={(message) => notifications.show({ message })}
+          setToken={(t) => {
+            if (t) {
+              cookieManager.setCookie("captcha", t);
+              setIsCaptchaReady(true);
+            } else {
+              cookieManager.removeCookie("captcha");
+              setIsCaptchaReady(false);
+            }
+          }}
+        />
+      )}
+
+      <Button
+        type="submit"
+        loading={loading}
+        disabled={!isDirty || !isCaptchaReady}
+      >
+        Sign In
+      </Button>
+    </>
+  )}
+</Form>
+```
+
+This structure effectively combines the UI components with the form state and mutation logic, resulting in a robust and maintainable form.

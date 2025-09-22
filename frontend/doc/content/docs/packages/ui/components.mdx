@@ -1,0 +1,246 @@
+---
+title: Components
+description: Documentation for reusable React components in @localspace/ui.
+---
+
+## Form
+
+A generic `Form` component that connects a TanStack Query mutation and a Mantine Form instance, handling the form submission and loading state.
+
+### Usage
+
+It's designed to wrap your form fields. It provides a `loading` state from the mutation and the form's `isDirty` state to its children via a render prop.
+
+```tsx
+import { Form, useFormMutation, handleError } from "@localspace/ui";
+import { Button, TextInput } from "@mantine/core";
+import { client } from "#lib/client"; // Your Tuyau client
+
+const MyFormComponent = () => {
+  const { form, mutation } = useFormMutation({
+    initialValues: {
+      name: "",
+      email: "",
+    },
+    validate: {
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+    },
+    mutation: {
+      mutationFn: (vars: { name: string; email: string }) => {
+        return client.api.v1.users.post(vars);
+      },
+      onSuccess: () => {
+        notifications.show({ message: "User created!" });
+      },
+      onError: (error) => handleError(error, { form }),
+    },
+  });
+
+  return (
+    <Form
+      form={form}
+      mutation={mutation}
+      submit={(values) => mutation.mutate(values)}
+    >
+      {({ loading, isDirty }) => (
+        <>
+          <TextInput label="Name" {...form.getInputProps("name")} />
+          <TextInput label="Email" {...form.getInputProps("email")} />
+          <Button type="submit" loading={loading} disabled={!isDirty}>
+            Submit
+          </Button>
+        </>
+      )}
+    </Form>
+  );
+};
+```
+
+---
+
+## QueryLoader
+
+A declarative component to handle the various states of a TanStack Query (`useQuery`). It simplifies rendering logic by handling loading, error, and empty states, allowing you to focus on the success state.
+
+### Props
+
+<TypeTable
+  type={{
+    query: {
+      description: "The query result object from a useQuery hook.",
+      type: "UseQueryResult<TData, TError>",
+      required: true,
+    },
+    children: {
+      description:
+        "A render prop that receives the non-nullable data when the query is successful.",
+      type: "(data: NonNullable<TData>) => React.ReactNode",
+      required: true,
+    },
+    loading: {
+      description:
+        "Content to display while loading. Defaults to 'Loading...'.",
+      type: "React.ReactNode",
+    },
+    error: {
+      description:
+        "Content for the error state. Can be a static node or a function receiving the error.",
+      type: "React.ReactNode | ((props: { error: TError }) => React.ReactNode)",
+    },
+    isEmpty: {
+      description:
+        "If true, the `empty` prop will be rendered instead of `children`.",
+      type: "boolean",
+    },
+    empty: {
+      description:
+        "Content to display when `isEmpty` is true. Defaults to 'No data'.",
+      type: "React.ReactNode",
+    },
+  }}
+/>
+
+### Usage
+
+```tsx
+import { QueryLoader } from "@localspace/ui/components";
+import { useQuery } from "@tanstack/react-query";
+import { Text, Alert } from "@mantine/core";
+
+const UserProfile = ({ userId }) => {
+  const userQuery = useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => fetchUser(userId),
+  });
+
+  return (
+    <QueryLoader
+      query={userQuery}
+      loading={<Text>Loading user profile...</Text>}
+      error={({ error }) => <Alert color="red">{error.message}</Alert>}
+      empty={<Text>No user found.</Text>}
+    >
+      {(user) => (
+        <div>
+          <h1>{user.name}</h1>
+          <p>{user.email}</p>
+        </div>
+      )}
+    </QueryLoader>
+  );
+};
+```
+
+---
+
+## Captcha
+
+A wrapper around `react-turnstile` to easily integrate Cloudflare Turnstile.
+
+### `useCaptcha`
+
+A companion hook to control the `Captcha` component.
+
+- **Returns**
+  - `captchaRef`: A `ref` to attach to the `Captcha` component.
+  - `resetCaptcha`: A function to programmatically reset the captcha.
+
+### Usage
+
+The `useCaptcha` hook provides a `ref` for the component and a `resetCaptcha` function. The most common pattern is to use component state to track whether the captcha has been successfully completed and to enable/disable the form submission button accordingly.
+
+```tsx
+import { Captcha, useCaptcha } from "@localspace/ui/components";
+import { useState } from "react";
+import { Button } from "@mantine/core";
+import { cookieManager } from "#lib/cookie_manager"; // Your app's cookie manager instance
+
+const CaptchaForm = () => {
+  const [isCaptchaReady, setIsCaptchaReady] = useState(false);
+  const { captchaRef, resetCaptcha } = useCaptcha();
+
+  const handleSubmit = () => {
+    // On submission, the captcha token is already in the cookie
+    // and will be sent with the API request.
+    console.log("Submitting form...");
+    // After submission, you might want to reset the captcha
+    resetCaptcha();
+  };
+
+  return (
+    <>
+      <Captcha
+        ref={captchaRef}
+        siteKey="YOUR_CLOUDFLARE_SITE_KEY"
+        setToken={(token) => {
+          if (token) {
+            // Store the token in a cookie to be sent with API requests
+            cookieManager.setCookie("captcha", token);
+            setIsCaptchaReady(true);
+          } else {
+            cookieManager.removeCookie("captcha");
+            setIsCaptchaReady(false);
+          }
+        }}
+        onMessage={(message) => console.log(message)}
+      />
+      <Button onClick={handleSubmit} disabled={!isCaptchaReady} mt="md">
+        Submit
+      </Button>
+    </>
+  );
+};
+```
+
+---
+
+## Logo
+
+Components for rendering the application logo.
+
+- `LogoBase`: A generic, theme-aware `Title` component from Mantine that can act as a link. Use this if you need more customization.
+- `Logo`: A specific implementation of `LogoBase` that renders the app name defined in the UI configuration.
+
+### Usage
+
+```tsx
+import { Logo, LogoBase } from "@localspace/ui/components";
+
+const Header = () => {
+  return (
+    <header>
+      {/* Renders the default app logo with a link to the homepage */}
+      <Logo />
+
+      {/* Renders a custom logo */}
+      <LogoBase href="/about" order={4}>
+        About Us
+      </LogoBase>
+    </header>
+  );
+};
+```
+
+---
+
+## LogoLoadingOverlay
+
+A simple loading overlay that displays the `Logo` component as its loader animation. It's ideal for indicating a global loading state, like when an application session is being initialized.
+
+### Usage
+
+```tsx
+import { LogoLoadingOverlay } from "@localspace/ui/components";
+import { useSession } from "#lib/hooks/use_session"; // Your app's session hook
+
+const AppShell = () => {
+  const { isLoading } = useSession();
+
+  // Show a full-screen logo loader while the user session is loading
+  if (isLoading) {
+    return <LogoLoadingOverlay />;
+  }
+
+  return <div>Your authenticated application content</div>;
+};
+```

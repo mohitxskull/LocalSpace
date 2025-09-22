@@ -1,0 +1,60 @@
+---
+title: Application Flow
+description: The lifecycle of a request in the backend application.
+---
+
+Understanding the flow of a request from the moment it hits the server to when a response is sent back is key to working with the backend. This project follows the standard AdonisJS request lifecycle but has some specific conventions.
+
+### 1. Routing (`start/routes.ts`)
+
+All incoming requests are first matched against the routes defined in `start/routes.ts`. This file acts as the main entry point for routing.
+
+- **Route Groups**: Routes are heavily grouped by prefix (`/api/v1`) and middleware.
+- **Modular Routes**: Instead of defining all routes in one file, the main file imports and calls route-defining functions from the `app/controllers` directory (e.g., `customerRoutes()` from `app/controllers/customer/routes.ts`). This keeps the routing organized by feature.
+
+### 2. Middleware (`start/kernel.ts`)
+
+Once a route is matched, the request passes through the registered middleware.
+
+- **Global Middleware**: These run on every request (e.g., `cors_middleware`).
+- **Named Middleware**: These are applied to specific routes or groups. The key custom middleware in this project are:
+  - `auth`: Protects routes, checks for a valid access token, and can verify user roles.
+  - `captcha`: Requires a valid CAPTCHA token for sensitive, unauthenticated endpoints like sign-in and sign-up.
+
+### 3. Validation (`@vinejs/vine`)
+
+Before the controller logic runs, the request body, params, and headers are typically validated. This project uses **VineJS** for validation.
+
+- **Schema Definition**: Validation schemas are usually defined at the top of the controller file using `vine.compile()`.
+- **Execution**: The controller calls `ctx.request.validateUsing(schema)` as its first step. If validation fails, a `ValidationException` is thrown automatically, which the global exception handler formats into a 422 response.
+
+```typescript
+// Example from signin_controller.ts
+export const input = vine.compile(
+  vine.object({
+    email: CustomerEMailS(),
+    password: CustomerPasswordS(),
+  }),
+);
+
+export default class Controller {
+  async handle(ctx: HttpContext) {
+    // This will throw if validation fails
+    const payload = await ctx.request.validateUsing(input);
+    // ...
+  }
+}
+```
+
+### 4. Controller Logic (`app/controllers`)
+
+If validation passes, the controller's `handle` method executes the core logic. This typically involves:
+
+1.  **Authorization**: Calling `ctx.bouncer` to authorize the action (see [Authorization docs](./authorization)).
+2.  **Database Interaction**: Using Lucid models (`User`, `Workspace`, etc.) to fetch or persist data.
+3.  **Business Logic**: Calling services or modules (like `tokenService`) for complex operations.
+4.  **Response**: Returning a JSON object, which AdonisJS automatically sends as the HTTP response.
+
+### 5. Error Handling (`app/exceptions/handler.ts`)
+
+If any exception is thrown during the process (e.g., a `ValidationException`, `ForbiddenException` from Bouncer, or a database error), it is caught by the global `HttpExceptionHandler`. This handler uses the `parseError` utility from `@localspace/node-lib` to ensure that all errors are converted into a consistent, predictable JSON response format for the frontend.

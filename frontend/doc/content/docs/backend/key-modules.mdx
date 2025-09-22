@@ -1,0 +1,73 @@
+---
+title: Key Modules & Patterns
+description: An overview of important custom modules and development patterns.
+---
+
+This project uses several custom modules and patterns to enforce consistency and separate concerns. Understanding them is key to contributing effectively.
+
+## TokenModule
+
+- **Location**: `app/modules/token_module.ts`
+- **Purpose**: A custom-built module to handle the creation and verification of all types of tokens (access, password reset, email verification). It extends the default AdonisJS functionality to provide a unified API for token management. It is registered in the IoC container and available via the `tokenService` import.
+
+## Model Extensions
+
+Lucid models are intentionally kept lean. Their responsibilities are primarily schema definition and relationships. Additional logic is delegated to three types of extension classes, accessible via getters on the model instance or class.
+
+### 1. Helpers (`.helper`)
+
+- **Location**: `app/helper/`
+- **Purpose**: To contain business logic that operates on a **single model instance**.
+- **Example**: `WorkspaceHelper` has an `activeMemberQuery` getter that builds a reusable query for active members of that specific workspace instance. `UserHelper` has a `getOwnedWorkspaceCount()` method.
+
+```typescript
+// Usage in a controller
+const user = await User.find(1);
+const count = await user.helper.getOwnedWorkspaceCount();
+```
+
+### 2. Transformers (`.transformer`)
+
+- **Location**: `app/transformers/`
+- **Purpose**: To control the serialization of a model instance. They define how a model object is converted to a plain JSON object for API responses, ensuring no sensitive data is leaked.
+- **Example**: `UserTransformer` has a `serialize()` method that returns the public user profile, omitting the password. It might also have other methods like `forAdmin()` to include more data for specific roles.
+
+```typescript
+// Usage in a controller
+const user = await User.find(1);
+return user.transformer.serialize();
+```
+
+### 3. Cachers (`.cacher`)
+
+- **Location**: `app/cacher/`
+- **Purpose**: To define and manage caching strategies for a model. They are accessed via a **static** getter on the model class.
+- **Example**: `Workspace.cacher` provides methods for caching data related to workspaces, such as the list of active members.
+
+```typescript
+// Get cached data
+const members = await Workspace.cacher.getActiveMembers({ workspace }).get();
+
+// Invalidate the cache
+await Workspace.cacher.getActiveMembers({ workspace }).expire();
+```
+
+## DB Reference (`dbRef`)
+
+- **Location**: `database/reference.ts`
+- **Purpose**: To provide a single source of truth for all database table and column names. It's a deeply-typed object that provides autocompletion and compile-time checks.
+- **Benefit**: This completely eliminates the use of "magic strings" in database queries, making the code safer and much easier to refactor.
+
+```typescript
+// Instead of this:
+// .where('user_id', user.id)
+
+// We do this:
+.where(dbRef.workspaceMember.userId, user.id)
+```
+
+## Type-Safe Settings (`config/setting.ts`)
+
+- **Location**: `config/setting.ts`
+- **Purpose**: To provide a centralized, type-safe location for application-specific settings (e.g., session duration, feature flags, item limits). It is exported `as const` to make it deeply readonly.
+- **Usage**: A global `getSetting()` utility function in `app/util/get_setting.ts` provides easy access to these settings from anywhere in the application.

@@ -1,0 +1,98 @@
+---
+title: Utilities
+description: Documentation for helper utilities in @localspace/ui.
+---
+
+## handleError
+
+A centralized function to handle errors from API mutations, especially when using `useFormMutation`. It automatically parses `TuyauHTTPError`, sets form field errors, and shows notifications for other errors.
+
+### Parameters
+
+- `error`: The `unknown` error object, typically from a `try...catch` or an `onError` callback.
+- `options`: An optional object with:
+  - `form`: A Mantine `useForm` instance. If provided, `handleError` will try to map validation errors to form fields.
+  - `onErrorData`: A callback function that receives the parsed error data. This is useful for handling specific error codes or triggering side effects.
+
+### Usage
+
+It's typically used in the `onError` callback of a `useMutation` or `useFormMutation` hook.
+
+```typescript
+import { useFormMutation, handleError } from "@localspace/ui";
+
+const { form, mutation } = useFormMutation({
+  initialValues: { email: "" },
+  mutation: {
+    mutationFn: (vars) => client.api.v1.auth.signin.post(vars),
+    onError: (error) => {
+      handleError(error, {
+        form, // Pass the form instance to enable field-specific errors
+        // Use onErrorData to handle specific API error codes
+        onErrorData: (errorData) => {
+          if (errorData.code === "EMAIL_NOT_VERIFIED") {
+            // Trigger a specific UI state for this error
+            setShowResendVerification(true);
+          }
+        },
+      });
+    },
+  },
+});
+```
+
+- If the API returns a validation error for the `email` field, `handleError` will call `form.setFieldError('email', 'Error message from server')`.
+- If the API returns an error with a specific `code` (like `EMAIL_NOT_VERIFIED`), you can intercept it with `onErrorData` to run custom logic.
+- If the API returns any other error, it will be displayed as a general notification.
+
+---
+
+## CookieManager
+
+A type-safe, class-based wrapper around `cookies-next` to centralize cookie management.
+
+### Usage
+
+1.  **Define your cookie keys and create an instance:**
+
+    It's best to create a single, shared instance of the manager.
+
+    ```typescript
+    // lib/cookie_manager.ts
+    import { CookieManager } from "@localspace/ui";
+
+    const cookieKeys = {
+      authToken: "app_auth_token",
+      theme: "app_theme",
+    } as const;
+
+    export const cookieManager = new CookieManager({
+      cookieKeys,
+      defaultOptions: {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+      },
+    });
+    ```
+
+2.  **Use the instance in your application:**
+
+    ```typescript
+    import { cookieManager } from "#lib/cookie_manager";
+
+    // Set a cookie
+    cookieManager.setCookie("authToken", "some-jwt-token");
+
+    // Get a cookie
+    const token = cookieManager.getCookie("authToken");
+
+    // Set an object value (will be stringified)
+    cookieManager.setCookie("theme", { mode: "dark" });
+
+    // Get and parse a JSON cookie
+    const theme = cookieManager.getParsedCookie<{ mode: string }>("theme");
+    // -> { mode: 'dark' }
+
+    // Remove a cookie
+    cookieManager.removeCookie("authToken");
+    ```

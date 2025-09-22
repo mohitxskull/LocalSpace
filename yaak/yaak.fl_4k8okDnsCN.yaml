@@ -1,0 +1,13 @@
+type: folder
+model: folder
+id: fl_4k8okDnsCN
+createdAt: 2025-09-06T14:24:02.242435797
+updatedAt: 2025-09-06T14:24:05.517126805
+workspaceId: wk_7BHps5Fohe
+folderId: null
+authentication: {}
+authenticationType: null
+description: ''
+headers: []
+name: Customer
+sortPriority: 1000.0

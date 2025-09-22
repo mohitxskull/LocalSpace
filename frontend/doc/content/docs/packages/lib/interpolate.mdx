@@ -1,0 +1,46 @@
+---
+title: Interpolate
+description: Documentation for the string interpolation utility.
+---
+
+## `interpolate`
+
+The `interpolate` function replaces placeholders within a string with values from a given data object. It supports nested object paths and allows for escaping placeholders.
+
+### Features
+
+- **Simple Placeholders**: Uses `{{ }}` for placeholders.
+- **Nested Properties**: Access nested data using dot notation (e.g., `{{ user.profile.name }}`).
+- **Escaping**: You can prevent interpolation by escaping the opening curly braces with a backslash (`\{{ ... }}`).
+- **Graceful Fallback**: If a key is not found in the data object, it's replaced with an empty string.
+
+### Usage
+
+```typescript
+import { interpolate } from "@localspace/lib";
+
+const data = {
+  username: "Skull",
+  user: {
+    profile: {
+      name: "Skull",
+    },
+  },
+};
+
+// Basic interpolation
+const greeting = interpolate("Hello, {{ username }}!", data);
+// -> 'Hello, Skull!'
+
+// Nested properties
+const nested = interpolate("Profile name: {{ user.profile.name }}", data);
+// -> 'Profile name: Skull'
+
+// Missing key
+const missing = interpolate("Your age is {{ age }}", data);
+// -> 'Your age is '
+
+// Escaped placeholder
+const escaped = interpolate("This is not a variable: \{{ username }}", data);
+// -> 'This is not a variable: {{ username }}'
+```

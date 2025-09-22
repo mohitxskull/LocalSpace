@@ -1,0 +1,5 @@
+{
+  "title": "Packages",
+  "pages": ["lib", "node_lib", "ui"],
+  "defaultOpen": true
+}

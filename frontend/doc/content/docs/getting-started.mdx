@@ -1,0 +1,52 @@
+---
+title: Getting Started
+description: How to set up and run the LocalSpace project on your local machine.
+---
+
+This guide will walk you through the steps required to get the LocalSpace monorepo up and running for development.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- **Node.js**: Version 20.6.0 or higher.
+- **pnpm**: This project uses `pnpm` as its package manager. You can install it with `npm install -g pnpm`.
+
+## 1. Installation
+
+First, clone the repository and install the dependencies using `pnpm`.
+
+```bash
+pnpm install
+```
+
+This command will install dependencies for all the packages (`frontend`, `backend`, `ui`, etc.) in the monorepo.
+
+## 2. Environment Variables
+
+The backend server requires a set of environment variables to run. The project includes an example file that you can use as a template.
+
+1.  Navigate to the backend directory: `cd backend/core`
+2.  Copy the example file: `cp .env.example .env`
+
+Now, open the newly created `.env` file and review the variables. For local development, the default values for the database, Redis, etc., are generally sufficient, but you may need to provide your own `CAPTCHA_PRIVATE_KEY` and other secrets.
+
+For a detailed explanation of all variables, see the [Environment Variables documentation](/docs/environment-variables).
+
+## 3. Running the Development Server
+
+This project uses **Turborepo** to manage the monorepo tasks. You can start the development servers for both the frontend and backend with a single command from the root of the project.
+
+```bash
+pnpm dev
+```
+
+This command will:
+
+- Start the **AdonisJS backend** API server in watch mode.
+- Start the **Next.js frontend** development server.
+
+Once the command finishes, you should be able to access:
+
+- The frontend application at `http://localhost:3000`.
+- The backend API at `http://localhost:3333`.

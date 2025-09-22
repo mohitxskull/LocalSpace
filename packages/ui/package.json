@@ -1,0 +1,60 @@
+{
+  "name": "@localspace/ui",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "prettier": "@adonisjs/prettier-config",
+  "files": [
+    "build",
+    "!build/bin"
+  ],
+  "exports": {
+    "./components": "./build/src/components/index.js",
+    "./configs/*": "./build/src/configs/*.js",
+    "./lib": "./build/src/lib/index.js",
+    "./lib/hooks": "./build/src/lib/hooks/index.js",
+    "./theme.css": "./build/src/styles/theme.css"
+  },
+  "scripts": {
+    "clean": "del-cli build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prebuild": "nr clean",
+    "build": "tsc && cpy ./src/styles ./build",
+    "playground": "tsx bin/playground.ts",
+    "check": "nr format && nr typecheck && nr lint"
+  },
+  "devDependencies": {
+    "@adonisjs/eslint-config": "^2.1.2",
+    "@adonisjs/prettier-config": "^1.4.5",
+    "@adonisjs/tsconfig": "^1.4.1",
+    "@eslint/eslintrc": "^3",
+    "@types/node": "24.3.3",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "cpy-cli": "^5.0.0",
+    "del-cli": "^5.1.0",
+    "eslint": "^9.34.0",
+    "eslint-config-next": "15.5.3",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.5.3",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": {
+    "@mantine/core": "^8.3.1",
+    "@mantine/form": "^8.3.1",
+    "@mantine/notifications": "^8.3.1",
+    "@tanstack/react-query": "^5.74.7",
+    "next": "15.5.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "@tuyau/client": "0.2.11-next.2",
+    "zod": "^4.1.5"
+  },
+  "dependencies": {
+    "@marsidev/react-turnstile": "^1.3.0",
+    "cookies-next": "^6.1.0"
+  }
+}

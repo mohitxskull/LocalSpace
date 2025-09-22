@@ -1,0 +1,33 @@
+---
+title: Object Utilities
+description: Documentation for type-safe object utilities.
+---
+
+## `typedObjectEntries`
+
+The `typedObjectEntries` function is a type-safe wrapper around the standard `Object.entries()`. It correctly infers and preserves the types of the keys and values, which is especially useful in strict TypeScript projects.
+
+### Usage
+
+```typescript
+import { typedObjectEntries } from "@localspace/lib";
+
+const roles = {
+  admin: "Administrator",
+  editor: "Content Editor",
+  viewer: "Read-only User",
+} as const;
+
+// Without typedObjectEntries, the type of `entry` is `[string, string]`
+for (const entry of Object.entries(roles)) {
+  // ... entry[0] is string, entry[1] is string
+}
+
+// With typedObjectEntries, the type of `entry` is correctly inferred
+// as `['admin' | 'editor' | 'viewer', 'Administrator' | 'Content Editor' | 'Read-only User']`
+for (const [key, value] of typedObjectEntries(roles)) {
+  console.log(`Role key: ${key}, Role name: ${value}`);
+  // `key` has type 'admin' | 'editor' | 'viewer'
+  // `value` has type 'Administrator' | 'Content Editor' | 'Read-only User'
+}
+```

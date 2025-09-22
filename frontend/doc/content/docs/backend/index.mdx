@@ -1,0 +1,32 @@
+---
+title: Architecture Overview
+description: An overview of the backend architecture and key concepts.
+---
+
+## Core Technologies
+
+The backend is a modern, type-safe API server built with **AdonisJS v6**. It leverages several key technologies and patterns:
+
+- **TypeScript**: The entire codebase is written in TypeScript, providing strong type safety.
+- **AdonisJS Lucid ORM**: Used for database queries and model definitions.
+- **VineJS**: For request validation.
+- **AdonisJS Bouncer**: For handling authorization and policies.
+- **Tuyau**: For end-to-end type-safe API route generation, creating a seamless bridge to the frontend.
+
+## Project Structure
+
+The project follows the standard AdonisJS directory structure, with some notable conventions:
+
+- `app/controllers`: Controllers are organized into subdirectories based on the user type and feature (e.g., `customer/auth`, `customer/workspace`).
+- `app/models`: Lucid models are extended with custom `Helper`, `Transformer`, and `Cacher` classes to separate concerns.
+- `app/modules`: Contains standalone modules that encapsulate complex business logic, like the `TokenModule`.
+- `app/validators`: Contains reusable VineJS validation schemas.
+- `config/setting.ts`: A dedicated, type-safe configuration file for application-specific settings.
+- `database/reference.ts`: Provides a type-safe `dbRef` object for all table and column names, eliminating magic strings in queries.
+
+## Key Architectural Patterns
+
+- **Type-Safe API Layer**: With **Tuyau**, the backend generates a manifest of all API routes, including their request and response types. The frontend consumes this manifest, enabling full type safety and autocompletion when making API calls.
+- **Service-Oriented Modules**: Complex, reusable logic is extracted into modules (e.g., `TokenModule`) and registered with the AdonisJS IoC container for dependency injection.
+- **Model-Centric Logic**: Models are kept lean. Business logic related to a model instance is placed in a `Helper` class, data transformation in a `Transformer` class, and caching strategies in a `Cacher` class. These are accessed via getters on the model (e.g., `user.helper`, `user.transformer`).
+- **Centralized Error Handling**: The `app/exceptions/handler.ts` uses a custom `parseError` utility to standardize all error responses, including validation errors, into a consistent JSON format for the frontend.

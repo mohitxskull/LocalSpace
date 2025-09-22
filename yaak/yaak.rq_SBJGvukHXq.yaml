@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_SBJGvukHXq
+createdAt: 2025-09-06T14:27:47.570704986
+updatedAt: 2025-09-06T14:28:03.455747050
+workspaceId: wk_7BHps5Fohe
+folderId: fl_fFC862fJzi
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "email": "mohitxskull@gmail.com",
+      "password": "master$master"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: bUsdiPz9PU
+method: POST
+name: Sign In
+sortPriority: 0.001
+url: ${[ BASE ]}/customer/auth/signin
+urlParameters: []

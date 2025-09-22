@@ -1,0 +1,78 @@
+---
+title: Authentication
+description: How authentication and token management works in the backend.
+---
+
+The backend uses a token-based authentication system built on top of AdonisJS Auth. It is designed to be stateless and supports multiple token types for different purposes.
+
+## 1. Auth Guard
+
+The default authentication guard is `api`, which is configured in `config/auth.ts`. It uses the `tokensGuard`, indicating that it authenticates requests via a Bearer token sent in the `Authorization` header.
+
+```typescript
+// config/auth.ts
+const authConfig = defineConfig({
+  default: "api",
+  guards: {
+    api: tokensGuard({
+      provider: tokensUserProvider({
+        tokens: "accessTokens",
+        model: () => import("#models/user"),
+      }),
+    }),
+  },
+});
+```
+
+## 2. Token Module
+
+The heart of the system is the custom `TokenModule` located at `app/modules/token_module.ts`. This module is registered in the IoC container and is responsible for creating and verifying all tokens in the application.
+
+It extends the default AdonisJS token functionality to handle different token types (`access`, `email_verification`, `password_reset`) stored in a single `tokens` database table.
+
+### `tokenService.create()`
+
+This method generates and stores a new token.
+
+- **Usage:** `signin_controller.ts`, `signup_controller.ts`
+- **Process:**
+  1. Creates a new transient token with a secret value.
+  2. Stores a hashed version in the `tokens` table along with the `userId`, `type`, and `expiresAt` timestamp.
+  3. Returns a `TokenHolder` instance containing the raw, un-hashed token value, which is then sent to the client.
+
+### `tokenService.verify()`
+
+This method validates an incoming token string.
+
+- **Usage:** `password/reset_controller.ts`, `auth/verify_controller.ts`
+- **Process:**
+  1. Decodes the token string to get its ID and the raw secret.
+  2. Finds the token in the database by its ID and `type`.
+  3. Verifies that the raw secret matches the stored hash.
+  4. Checks if the token has expired.
+  5. If valid, it returns the `TokenHolder` instance; otherwise, it returns `null`.
+
+## 3. Authentication Flow (Sign In)
+
+The sign-in process in `app/controllers/customer/auth/signin_controller.ts` demonstrates the complete flow:
+
+1.  **Validation**: User email and password are validated.
+2.  **Rate Limiting**: A limiter is applied to the user's IP and email to prevent brute-force attacks.
+3.  **Credential Check**: The user is fetched from the database, and their password hash is verified.
+4.  **Email Verification Check**: It checks if the user's `verifiedAt` timestamp is set.
+5.  **Session Limit**: The system checks how many `access` tokens the user already has. If it exceeds the limit in `config/setting.ts`, the oldest tokens are deleted to enforce a session limit.
+6.  **Token Creation**: A new `access` token is created using `tokenService.create()`.
+7.  **Response**: The raw token value and its expiry date are sent back to the client.
+
+## 4. Protecting Routes
+
+Routes are protected using the `auth` middleware defined in `start/kernel.ts`. This middleware can also check for user roles.
+
+```typescript
+// start/routes.ts
+router
+  .group(() => {
+    // ... routes
+  })
+  .use(middleware.auth({ roles: ["customer"] }));
+```

@@ -1,0 +1,29 @@
+type: http_request
+model: http_request
+id: rq_yooc4BrKEg
+createdAt: 2025-09-06T14:23:57.800808253
+updatedAt: 2025-09-06T14:27:51.984506935
+workspaceId: wk_7BHps5Fohe
+folderId: fl_fFC862fJzi
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "name": "Skull Dot",
+      "email": "mohitxskull@gmail.com",
+      "password": "master$master",
+      "confirmPassword": "master$master"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: bUsdiPz9PU
+method: POST
+name: Sign Up
+sortPriority: 0.0
+url: ${[ BASE ]}/customer/auth/signup
+urlParameters: []

@@ -1,0 +1,158 @@
+---
+title: General Utilities
+description: Documentation for logDeep, and Serialization Utilities.
+---
+
+## logDeep
+
+The `logDeep` function is a simple debugging utility that enhances `console.log` by using Node.js's `util.inspect` to print objects with full depth and colorization. A key feature is that it returns the original object, allowing you to insert it into your code without breaking the flow.
+
+### Features
+
+- **Deep Inspection**: Logs objects to the console, showing all nested properties.
+- **Colorized Output**: Makes the logged output easier to read.
+- **Chainable**: It returns the object that was passed to it, so you can use it inline.
+- **Configurable**: You can pass `InspectOptions` to customize the output.
+
+### Usage
+
+`logDeep` is perfect for quick debugging without having to write multiple `console.log` statements or interrupt your code's execution.
+
+#### Basic Example
+
+```typescript
+import { logDeep } from "@localspace/node-lib";
+
+const myObject = {
+  a: 1,
+  b: { c: 2, d: { e: 3 } },
+};
+
+logDeep(myObject);
+```
+
+#### Inline / Chainable Example
+
+This is where `logDeep` really shines. You can wrap a function call or a variable assignment with `logDeep` to inspect its value without adding extra lines of code.
+
+```typescript
+import { logDeep } from "@localspace/node-lib";
+
+async function findUser(id: number) {
+  // ... logic to find a user
+  return { id, name: "John Doe", profile: { age: 30 } };
+}
+
+// Log the user object without breaking the assignment
+const user = logDeep(await findUser(123));
+
+console.log(`User's name is ${user.name}`);
+```
+
+#### Customizing the Output
+
+You can pass a second argument to `logDeep` with options for `util.inspect`.
+
+```typescript
+import { logDeep } from "@localspace/node-lib";
+
+const complexObject = {
+  /* ... */
+};
+
+// Log with a custom depth and show hidden properties
+logDeep(complexObject, { depth: 5, showHidden: true });
+```
+
+### API
+
+#### logDeep
+
+`logDeep<T>(object: T, options: InspectOptions = {}): T`
+
+<TypeTable
+  type={{
+    object: {
+      description: "The variable or object you want to log.",
+      type: "T",
+      required: true,
+    },
+    options: {
+      description:
+        "An `InspectOptions` object from `node:util` to customize the inspection.",
+      type: "InspectOptions",
+    },
+  }}
+/>
+
+**Returns:** The original `object` that was passed in.
+
+---
+
+## Serialization Utilities
+
+This module provides helper functions for serializing common data structures in an AdonisJS application, such as `DateTime` objects and paginated model results.
+
+### `serializeDateTime`
+
+A function to safely serialize a Luxon `DateTime` object into an ISO 8601 string. It's overloaded to handle both nullable and non-nullable `DateTime` objects.
+
+<TypeTable
+  type={{
+    dateTime: {
+      description: "The Luxon DateTime object to serialize.",
+      type: "DateTime | null",
+      required: true,
+    },
+  }}
+/>
+
+**Returns:** `string | null`
+
+### `serializePage`
+
+An async function that transforms a Lucid `ModelPaginatorContract` (the result of a `.paginate()` query) into a standardized, serializable object. It processes each model instance in the paginator with a provided transfer function.
+
+#### Example
+
+```typescript
+// In a controller that lists paginated results
+import { serializePage } from "@localspace/node-lib";
+import Workspace from "#models/workspace";
+
+// ... inside a controller method
+const page = request.input("page", 1);
+const limit = request.input("limit", 10);
+
+const workspacesPaginator = await Workspace.query()
+  .where("owner_id", auth.user.id)
+  .preload("members") // Preload related members
+  .paginate(page, limit);
+
+return serializePage(workspacesPaginator, async (workspace) => {
+  // `workspace` is an instance of the Workspace model.
+  // We can use its transformer and add more data.
+  const serialized = await workspace.transformer.serialize();
+
+  // Example: add the member count to the response
+  return {
+    ...serialized,
+    memberCount: workspace.members.length,
+  };
+});
+```
+
+<TypeTable
+  type={{
+    paginator: {
+      description: "The Lucid ModelPaginatorContract object.",
+      type: "ModelPaginatorContract<any>",
+      required: true,
+    },
+    transfer: {
+      description: "A function to transform each model instance.",
+      type: "(instance: any) => any",
+      required: true,
+    },
+  }}
+/>

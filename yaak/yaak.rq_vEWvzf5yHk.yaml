@@ -1,0 +1,18 @@
+type: http_request
+model: http_request
+id: rq_vEWvzf5yHk
+createdAt: 2025-09-06T14:28:33.928561940
+updatedAt: 2025-09-06T14:31:29.126946822
+workspaceId: wk_7BHps5Fohe
+folderId: fl_Y6q3uReiAX
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: Show
+sortPriority: 0.0009
+url: ${[ BASE ]}/customer/auth/profile
+urlParameters: []

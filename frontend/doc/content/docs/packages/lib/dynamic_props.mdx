@@ -1,0 +1,44 @@
+---
+title: Dynamic Props
+description: Documentation for the dynamic props utility.
+---
+
+## `MakePropsDynamic` & `resolveDynamicProps`
+
+This utility allows you to create objects where property values can be either a direct value or a function that resolves to that value. This is useful for configurations or objects where some properties might require computation, but you only want to perform the computation when the value is actually needed.
+
+- `MakePropsDynamic<T>`: A mapped type that transforms each property in `T` to be `T[K] | (() => T[K])`.
+- `resolveDynamicProps<T>`: A function that takes an object of `MakePropsDynamic<T>` and resolves all function properties to their return values, resulting in a plain object of type `T`.
+
+### Usage
+
+```typescript
+import { resolveDynamicProps, type MakePropsDynamic } from "@localspace/lib";
+
+interface Config {
+  port: number;
+  host: string;
+  enableTLS: boolean;
+}
+
+const dynamicConfig: MakePropsDynamic<Config> = {
+  port: 8080,
+  host: () => {
+    console.log("Resolving host...");
+    return process.env.HOST || "localhost";
+  },
+  enableTLS: false,
+};
+
+// The host() function has not been called yet.
+
+const resolvedConfig = resolveDynamicProps(dynamicConfig);
+// Console output: Resolving host...
+
+console.log(resolvedConfig);
+// {
+//   port: 8080,
+//   host: 'localhost',
+//   enableTLS: false
+// }
+```

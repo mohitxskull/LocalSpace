@@ -1,0 +1,77 @@
+---
+title: Promise Utilities
+description: Documentation for promise-related helper utilities.
+---
+
+## `promiseMap`
+
+A convenient shorthand for `Promise.all(array.map(callback))`. It iterates over an array, applies an async callback to each item, and returns a promise that resolves to an array of the results.
+
+### Usage
+
+This is used in `@backend/core` to serialize a list of models.
+
+```typescript
+import { promiseMap } from "@localspace/lib";
+
+const userIds = [1, 2, 3];
+
+const users = await promiseMap(userIds, async (id) => {
+  const user = await User.find(id);
+  return user.transformer.serialize();
+});
+
+// `users` is now an array of serialized user objects
+```
+
+## `tryPromise`
+
+This utility wraps a promise and returns a tuple of `[result, error]`, similar to Go's error handling pattern. This allows you to handle promise rejections without a `try...catch` block, which can be useful for cleaner inline error handling.
+
+### Usage
+
+```typescript
+import { tryPromise } from "@localspace/lib";
+
+async function mightFail(shouldFail: boolean): Promise<string> {
+  if (shouldFail) {
+    throw new Error("Operation failed");
+  }
+  return "Success!";
+}
+
+// --- Success Case ---
+const [result, error] = await tryPromise(mightFail(false));
+
+if (error) {
+  // This block is not executed
+  console.error("Caught an error:", error);
+} else {
+  console.log("Got a result:", result); // -> 'Got a result: Success!'
+}
+
+// --- Failure Case ---
+const [result2, error2] = await tryPromise(mightFail(true));
+
+if (error2) {
+  console.error("Caught an error:", error2.message); // -> 'Caught an error: Operation failed'
+} else {
+  // This block is not executed
+}
+```
+
+## `sleep`
+
+An asynchronous `sleep` function that resolves a promise after a specified number of milliseconds.
+
+### Usage
+
+```typescript
+import { sleep } from "@localspace/lib";
+
+async function runWithDelay() {
+  console.log("Starting...");
+  await sleep(1000); // Wait for 1 second
+  console.log("Finished after 1 second.");
+}
+```

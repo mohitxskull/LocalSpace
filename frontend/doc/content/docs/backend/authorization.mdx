@@ -1,0 +1,70 @@
+---
+title: Authorization
+description: How authorization and access control is handled using Bouncer.
+---
+
+Authorization (determining what a user is allowed to do) is managed by **AdonisJS Bouncer**. This allows for a clean separation of authorization logic from your controllers and business logic.
+
+## 1. Policies
+
+Authorization rules are defined within **Policy** classes in the `app/policies` directory. Each policy typically corresponds to a Lucid model and contains methods that define the permissions for actions on that model.
+
+For example, `BlogPolicy.ts` defines who can `create`, `update`, `delete`, or `publish` a blog post.
+
+```typescript
+// app/policies/blog_policy.ts
+import User from "#models/user";
+import Workspace from "#models/workspace";
+import Blog from "#models/blog";
+
+export default class BlogPolicy {
+  // A user can create a blog if they are an owner, manager, or editor of the workspace.
+  async create(user: User, workspace: Workspace): Promise<boolean> {
+    return await workspace.memberHasRole({
+      user,
+      roles: ["owner", "manager", "editor"],
+    });
+  }
+
+  // A user can only update a blog if they have the right role AND the blog is a draft.
+  async update(user: User, workspace: Workspace, blog: Blog): Promise<boolean> {
+    const can = await workspace.memberHasRole({
+      user,
+      roles: ["owner", "manager", "editor"],
+    });
+    if (!can) return false;
+
+    if (!blog.isDraft) {
+      return AuthorizationResponse.deny("Blog is not in draft status");
+    }
+
+    return true;
+  }
+}
+```
+
+## 2. Using Policies in Controllers
+
+Controllers use `ctx.bouncer` to authorize actions before executing them. This ensures that no unauthorized operations are performed.
+
+The `authorize` method will automatically throw a `ForbiddenException` if the policy check fails, which is then handled by the global exception handler.
+
+```typescript
+// app/controllers/customer/workspace/blog/create_controller.ts
+
+// ...
+const workspace = await Workspace.findOrFail(payload.params.workspaceId)
+
+// Authorize the 'create' action on the 'BlogPolicy'
+await ctx.bouncer.with('BlogPolicy').authorize('create', workspace)
+
+// If authorization passes, the code continues...
+const blog = await workspace.related('blogs').create({ ... })
+// ...
+```
+
+## 3. Role-Based Logic
+
+A key pattern in this project is that authorization is often dependent on a user's role within a specific context, such as a `Workspace`. The policies don't contain complex role-checking logic themselves. Instead, they delegate this to helper methods on the models.
+
+In the `BlogPolicy` example above, the check `workspace.memberHasRole(...)` is a method on the `Workspace` model that encapsulates the logic for checking a user's membership and role within that specific workspace. This keeps the policies clean and readable.

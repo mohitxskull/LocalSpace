@@ -1,0 +1,14 @@
+{
+  "title": "UI Library",
+  "pages": [
+    "index",
+    "configuration",
+    "---API Reference---",
+    "components",
+    "hooks",
+    "utilities",
+    "---Examples---",
+    "creating-a-form"
+  ],
+  "defaultOpen": true
+}

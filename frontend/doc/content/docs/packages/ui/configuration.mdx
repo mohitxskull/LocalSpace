@@ -1,0 +1,28 @@
+---
+title: Configuration
+description: Documentation for configuring the @localspace/ui package.
+---
+
+## `setting.ts`
+
+The file `packages/ui/src/configs/setting.ts` contains static, read-only configuration for the UI package.
+
+### Default Configuration
+
+The configuration object is exported `as const`. This is a TypeScript feature that makes its properties deeply `readonly` and allows the compiler to infer the most specific literal types for its values, rather than general types like `string`.
+
+```typescript
+export const setting = {
+  app: {
+    name: "Localspace",
+    description: "Localspace is a boilerplate for building web applications",
+    themeColor: "#ffffff",
+  },
+} as const;
+```
+
+### Usage
+
+This configuration is used by components within the package. For example, the `Logo` component uses `setting.app.name` to render the application's name.
+
+You can import and use these settings in your application as needed, or modify the file directly to suit your project's branding. Because of the `as const` assertion, TypeScript will prevent any accidental modifications to this object at runtime, ensuring the configuration remains consistent.
